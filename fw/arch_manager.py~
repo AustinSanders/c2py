@@ -1,0 +1,12 @@
+
+class Arch_Manager():
+
+    def __init__(self):
+        self._associations = {}
+
+
+    def add_element(self, class_name, args):
+        if (args[0] not in self._associations):
+
+        else:
+            print("An element already exists with ID " , args[0])
