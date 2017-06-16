@@ -13,7 +13,8 @@ class ArchElement(threading.Thread):
         self.properties = {}
         self.elem_status = "RUNNING"
         self.behavior = passed_behavior
-        print("Initialized ArchElem: " + id)
+        #print("Initialized ArchElem: " + str(id))
+        print("Initialized " + self.__class__.__name__ + ": " + str(id))
 
 
     # This class method should return a dictionary after the pattern of the one provided here. It is
