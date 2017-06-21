@@ -1,24 +1,16 @@
 import sys
-sys.path.append(r'C:\Users\as2544\C2Py')
+sys.path.append(r'E:\C2Py')
 import fw
 from queue import Empty
 import time
 
-# this is a one-way conversation from top (sender) to bottom (receiver).
+# This is a one-way conversation from top (sender) to bottom (receiver).
 
 # This is important for router to connect things.  This creates a listener on an interface to a
 # dispatcher.  The listener is put into the list of the interface (list of listeners).
 
-# flow = from interface to listener to disptacher
-def connect(interface_pair, dispatcher_pair, id):
-    el = fw.EventListener(id, dispatcher_pair[0].get_event_dispatcher(dispatcher_pair[1]))
-    interface_pair[0].get_interface(interface_pair[1]).add_event_listener(el)
-
-
-# so need handler and behavior.  FLow = compentent to dispatcher.  THis is the TOP component.
-
 class Sender(fw.Component):
-    def sender_behavior(self):        
+    def sender_behavior(self):
        message = input("Give a message to send: ")
        e = fw.Event({'source':str(self.id),'message':str(message)})
        self.fire_event_on_interface(e, "bottom")
@@ -36,13 +28,12 @@ class Sender(fw.Component):
 
 # will need a handler
 class Receiver(fw.Component):
-    # IMportant to have.  Top may not get reply in one way exchange
     class RequestHandler():
         def handle(self, event):
             print("{0} received a notification:\n{1}\n".format(event.payload()['source'], event.payload()['message']))
 
     def receiver_behavior(self):
-        # this will take the event and queus and send to handler.
+        # this will take the event and queues and send to handler.
         for dispatcher in self.event_dispatchers:
             try:
                 dispatcher.dispatch_event()
@@ -92,17 +83,22 @@ class Router(fw.Connector):
 # Idea is to connect bottom interface of top component to top interface of connector/router, connect bottom interface
 # of router to request dispatcher of bottom component.
 if __name__ == "__main__":
-    sender = Sender("Sender")
-    router = Router("Router")
-    receiver = Receiver("Receiver")
+    #sender = Sender("Sender")
+    #router = Router("Router")
+    #receiver = Receiver("Receiver")
 
-    connect((sender, "bottom"), (router, "request_dispatcher"), 0)
+    #connect((sender, "bottom"), (router, "request_dispatcher"), 0)
 
-    connect((router, "bottom"), (receiver,     "request_dispatcher"), 0)
+    #connect((router, "bottom"), (receiver,     "request_dispatcher"), 0)
 
+    #sender.start()
+    #receiver.start()
+    #router.start()
 
-    sender.start()
-    receiver.start()
-    router.start()
-
-    sender.join()
+    #sender.join()
+    manager = fw.ArchManager('../examples/test.yaml')
+    arch = fw.Architecture(1)
+    arch.set_manager(manager)
+    print(manager.model)
+    print(arch.components)
+    manager.add_all()

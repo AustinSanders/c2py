@@ -1,11 +1,20 @@
-bill-to: &id001
-    given  : Chris
-    family : Dumars
-    address:
-        lines: |
-            458 Walkman Dr.
-            Suite #292
-        city    : Royal Oak
-        state   : MI
-        postal  : 48046
+Receiver1: &Receiver1
+    type  : Receiver
+    requests : Router1
+    notifies :
+    arguments:
+    location : E:/C2Py/examples/message.py
 
+Sender1: &Sender1
+    type  : Sender
+    requests :
+    notifies : Router1
+    arguments:
+    location : E:/C2Py/examples/message.py
+
+Router1: &Router1
+    type  : Router
+    requests: Sender1
+    notifies : Receiver1
+    arguments:
+    location : E:/C2Py/examples/message.py

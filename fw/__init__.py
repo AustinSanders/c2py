@@ -5,6 +5,8 @@
 
 from .arch_element import ArchElement
 from .component import Component
+from .architecture import Architecture
+from .arch_manager import ArchManager
 from .connector import Connector
 from .event import Event
 from .event_listener import EventListener
