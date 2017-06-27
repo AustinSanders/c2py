@@ -2,33 +2,53 @@ import yaml
 import sys
 sys.path.append(r'E:\C2PY')
 import fw
-from queue import Empty
 import importlib.util
 
 
 
 def load_external_class(class_name, location):
+    """ Responsible for importing a class that is not known at time of
+    instantiation.
+
+    Keyword arguments:
+    class_name -- the name of that class for which we're searching
+    location -- the fully qualified path containing the class
+    """
     spec = importlib.util.spec_from_file_location("message",location)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return getattr(mod, class_name)
 
 
+def connect(interface_pair, dispatcher_pair, id):
+    el = fw.EventListener(id, dispatcher_pair[0].get_event_dispatcher(dispatcher_pair[1]))
+    interface_pair[0].get_interface(interface_pair[1]).add_event_listener(el)
+
+
 class ArchManager(fw.Component):
+    """ Manages an architecture."""
+
     def __init__(self, model_file):
         self.model_file = model_file
         self.model = self.read_yaml(model_file)
         self.architecture = None
         super().__init__("manager", self.management_behavior)
 
+
     def set_architecture(self, architecture):
+        """ Assigns an architecture to this manager."""
         self.architecture = architecture
 
-    def connect(interface_pair, dispatcher_pair, id):
-        el = fw.EventListener(id, dispatcher_pair[0].get_event_dispatcher(dispatcher_pair[1]))
-        interface_pair[0].get_interface(interface_pair[1]).add_event_listener(el)
+
+
 
     def get_element(self, element_id):
+        """ Returns an element from the architectures list of components or
+        connectors.
+
+        Keyword arguments:
+        element_id -- The unique id of the element that we wish to return.
+        """
         element = None
         if element_id in self.architecture.components:
             element = self.architecture.components[element_id]
@@ -62,19 +82,29 @@ class ArchManager(fw.Component):
                 self.architecture.add_connector(element_id, new_element)
             else:
                 print("Element of type " + class_name + " is not a valid component")
-        #if (args[0] not in self._associations):
-            #new_component = eval(class_name)(*args)
-            #self._associations[args[0]] = new_component
-            #return new_component
-        #else:
-            #print("An element already exists with ID " , args[0])
 
+
+    # @@TODO rename ? 
     def add_all(self):
         for key in self.model:
             c_name = self.model[key]['type']
             args = self.model[key]['arguments']
             location = self.model[key]['location']
             self.add_element(key,c_name, location, args)
+
+    def connect_all(self):
+        for key in self.model:
+            current = self.get_element(key)
+            print(current)
+            c_desc = current.description()
+            for elem in self.model[key]['notifies']:
+                listener = self.get_element(elem)
+                l_desc = listener.description()
+                connect([current, c_desc["interfaces"]["top"]], [listener, l_desc["dispatchers"]["bottom"]],0)
+            for elem in self.model[key]['requests']:
+                listener = self.get_element(elem)
+                l_desc = listener.description()
+                connect([current, c_desc["interfaces"]["bottom"]], [listener, l_desc["dispatchers"]["top"]],0)
 
     def start_all(self):
         for key in self.model:

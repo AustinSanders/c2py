@@ -19,11 +19,11 @@ class ArchElement(threading.Thread):
 
     # This class method should return a dictionary after the pattern of the one provided here. It is
     # used by the ArchitectureManager to make connections between ArchElements.
-    def description():
-        description = {           "name" : "ArchElement",
+    def description(self):
+        description = {             "id" : "ArchElement",
                                  "class" : ArchElement,
-                            "interfaces" : [], # List of strings which are interface ids
-                           "dispatchers" : [], # List of strings which are dispatcher ids
+                            "interfaces" : {}, # Dict of strings which are interface ids
+                           "dispatchers" : {}, # Dict of strings which are dispatcher ids
                         "events_emitted" : [], # List of classes which subclass Event
                        "events_consumed" : [], # List of classes which subclass Event
                       }
@@ -41,8 +41,12 @@ class ArchElement(threading.Thread):
     # behavior.
     def run(self):
         while True:
-            #self.arch_event_dispatcher.dispatch_event()
             if self.elem_status == "STOPPED":
+                break
+            # Differentiate stopping and stopped to ensure quiescence is fully
+            #  achieved before any changes are made to the component
+            elif self.elem_status == "STOPPING":
+                self.elem_status = "STOPPED"
                 break
             elif self.elem_status == "SUSPENDED":
                 pass
@@ -62,7 +66,7 @@ class ArchElement(threading.Thread):
     # Prepares the ArchElement for deletion or removal from the architecture and halts its activity.
     # NOTE: Stopped ArchElements should ignore events received after they are stopped
     def stop(self):
-        self.elem_status == "STOPPED"
+        self.elem_status == "STOPPING"
 
     def add_interface(self, interface):
         self.interfaces.append(interface)
