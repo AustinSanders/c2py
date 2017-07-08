@@ -7,15 +7,15 @@ import time
 
 class Sender(fw.Component):
     def sender_behavior(self):
-       message = input("Give a message to send: ")
-       e = fw.Event({'message':str(message)})
-       self.fire_event_on_interface(e, "bottom")
+        message = input("Give a message to send: ")
+        e = fw.Event({'message':str(message)})
+        self.fire_event_on_interface(e, "bottom")
 
     def description(self):
         description = {
                 "id" : self.id,
                 "class" : Sender,
-                "interfaces" : {"bottom": "bottom"},
+                "interfaces" : ["bottom"],
             }
         return description
 
@@ -40,17 +40,16 @@ class Receiver(fw.Component):
         description = {
                 "id" : self.id,
                 "class" : Receiver,
-                "dispatchers" : {"top": "request_dispatcher"}
+                "dispatchers" : ["request_dispatcher"]
             }
         return description
 
     def __init__(self, id):
         super().__init__(id, self.receiver_behavior)
-        from_top = fw.EventDispatcher("request_dispatcher", self, 0.1)
+        from_top = fw.EventDispatcher("request_dispatcher", self)
         from_top.add_event_handler(self.RequestHandler())
         self.add_event_dispatcher(from_top)
         self.properties["owner"] = self
-
 
 
 
@@ -62,18 +61,15 @@ class Router(fw.Connector):
 
     def router_behavior(self):
         for dispatcher in self.event_dispatchers:
-            try:
-                dispatcher.dispatch_event()
-            except Empty:
-                pass
+            dispatcher.dispatch_event()
 
 
     def description(self):
         description = {
                 "id" : self.id,
                 "class" : Router,
-                "interfaces" : {"bottom": "bottom"},
-                "dispatchers" : {"top": "request_dispatcher"}
+                "interfaces" : ["bottom"],
+                "dispatchers" : ["request_dispatcher"]
             }
         return description
 
@@ -81,25 +77,12 @@ class Router(fw.Connector):
     def __init__(self, id):
         super().__init__(id, self.router_behavior)
         self.add_interface(fw.EventInterface("bottom"))
-        from_top = fw.EventDispatcher("request_dispatcher", self, 0.1)
+        from_top = fw.EventDispatcher("request_dispatcher", self)
         from_top.add_event_handler(self.RequestHandler())
         self.add_event_dispatcher(from_top)
         self.properties["owner"] = self
 
 if __name__ == "__main__":
-    #sender = Sender("Sender")
-    #router = Router("Router")
-    #receiver = Receiver("Receiver")
-
-    #connect((sender, "bottom"), (router, "request_dispatcher"), 0)
-
-    #connect((router, "bottom"), (receiver,     "request_dispatcher"), 0)
-
-    #sender.start()
-    #receiver.start()
-    #router.start()
-
-    #sender.join()
     manager = fw.ArchManager('../examples/test.yaml')
     arch = fw.Architecture(1)
     arch.set_manager(manager)

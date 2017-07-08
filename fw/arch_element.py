@@ -11,7 +11,7 @@ class ArchElement(threading.Thread):
         self.interfaces = []
         self.event_dispatchers = []
         self.properties = {}
-        self.elem_status = "RUNNING"
+        self.elem_status = "SUSPENDED"
         self.behavior = passed_behavior
         #print("Initialized ArchElem: " + str(id))
         print("Initialized " + self.__class__.__name__ + ": " + str(id))
@@ -22,8 +22,8 @@ class ArchElement(threading.Thread):
     def description(self):
         description = {             "id" : "ArchElement",
                                  "class" : ArchElement,
-                            "interfaces" : {}, # Dict of strings which are interface ids
-                           "dispatchers" : {}, # Dict of strings which are dispatcher ids
+                            "interfaces" : [], # List of strings which are interface ids
+                           "dispatchers" : [], # List of strings which are dispatcher ids
                         "events_emitted" : [], # List of classes which subclass Event
                        "events_consumed" : [], # List of classes which subclass Event
                       }
@@ -43,30 +43,28 @@ class ArchElement(threading.Thread):
         while True:
             if self.elem_status == "STOPPED":
                 break
-            # Differentiate stopping and stopped to ensure quiescence is fully
-            #  achieved before any changes are made to the component
-            elif self.elem_status == "STOPPING":
-                self.elem_status = "STOPPED"
-                break
             elif self.elem_status == "SUSPENDED":
-                pass
+                ae_dispatcher = self.get_event_dispatcher("ArchEvent")
+                if ae_dispatcher is not None:
+                    ae_dispatcher.dispatch_event()
             elif self.elem_status == "RUNNING":
                 self.behavior()
 
     # Temporarily suspends the ArchElement's activity if it was running, otherwise it should do
     # nothing. Undone by calling resume().
     def suspend(self):
-        self.elem_status == "SUSPENDED"
+        self.elem_status = "SUSPENDED"
 
     # Resumes the ArchElement's activity if it was suspended, otherwise it should do nothing.
     # NOTE: Suspended ArchElements should still receive events
     def resume(self):
-        self.elem_status == "RUNNING"
+        self.elem_status = "RUNNING"
 
     # Prepares the ArchElement for deletion or removal from the architecture and halts its activity.
     # NOTE: Stopped ArchElements should ignore events received after they are stopped
     def stop(self):
-        self.elem_status == "STOPPING"
+        self.elem_status = "STOPPED"
+
 
     def add_interface(self, interface):
         self.interfaces.append(interface)

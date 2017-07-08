@@ -1,3 +1,5 @@
+import fw
+
 class ArchEvent(fw.Event):
 
     """An event sent by the ArchitectureManager containing commands to be carried out by components,
@@ -6,14 +8,14 @@ class ArchEvent(fw.Event):
     formal_types = ["START",
                     "STOP",
                     "SUSPEND",
-                    "RESUME",]
+                    "RESUME",
+                    ]
 
-    def __init__(self, type):
-        """TODO: to be defined1. """
-        formal_type = type.upper()
+    def __init__(self, e_type, recipient_id):
+        formal_type = e_type.upper()
 
-        if formal_type not in formal_types:
+        if formal_type not in self.formal_types:
             raise LookupError
 
-        fw.Event.__init__(self, formal_type)
-
+        super().__init__({'type' :formal_type})
+        self._payload['recipient'] = recipient_id

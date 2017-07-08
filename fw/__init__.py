@@ -9,6 +9,8 @@ from .architecture import Architecture
 from .arch_manager import ArchManager
 from .connector import Connector
 from .event import Event
+from .arch_event import ArchEvent
 from .event_listener import EventListener
 from .event_interface import EventInterface
 from .event_dispatcher import EventDispatcher
+from .arch_event_dispatcher import ArchEventDispatcher

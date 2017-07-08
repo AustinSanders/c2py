@@ -39,7 +39,7 @@ class Event():
         self._payload = payload
 
     def __str__(self):
-        return("\tSource:\t\t{0}\n\tPayload:\t{1}".format(self.source, self._payload['message']))
+        return("\n\tSource:\t\t{0}\n\tPayload:\t{1}".format(self._payload['source'], self._payload['message']))
 
     def payload(self):
         return self._payload
@@ -59,10 +59,11 @@ class Event():
             return e
         e = make_from(self)
         e._payload['source'] = e._payload['source'] + ' ' +source
+        print(str(self))
         return e
 
     def clone(self):
         return Event(copy.deepcopy(self.payload_copy()))
-        
+
 def make_from(other_event):
     return(Event(other_event.payload_copy()))

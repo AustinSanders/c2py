@@ -11,4 +11,4 @@ class Component(fw.ArchElement):
             super().__init__(id, self.behavior)
         else:
             super().__init__(id, passed_behavior)
-
+        self.start()

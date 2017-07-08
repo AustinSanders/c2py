@@ -1,4 +1,4 @@
-from queue import Queue
+from queue import Queue,Empty
 
 
 class EventDispatcher(Queue):
@@ -24,9 +24,11 @@ class EventDispatcher(Queue):
         self.event_handlers.remove(self.get_event_handler(event_handler_id))
 
     def dispatch_event(self):
-        current_event = self.get(self.blocking, self.timeout)
-        current_event.context()['owner'] = self.owner
-        self.task_done()
-        for handler in self.event_handlers:
-            handler.handle(current_event)
-
+        try:
+            current_event = self.get(self.blocking, self.timeout)
+            current_event.context()['owner'] = self.owner
+            self.task_done()
+            for handler in self.event_handlers:
+                handler.handle(current_event)
+        except Empty:
+            pass
