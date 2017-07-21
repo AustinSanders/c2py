@@ -39,7 +39,7 @@ class Event():
         self._payload = payload
 
     def __str__(self):
-        return (str(self.context()) + " " + str(self.payload()))
+        return str(self.payload())
 
     def payload(self):
         return self._payload
@@ -62,14 +62,13 @@ class Event():
         return e
 
     def clone(self):
-        # Create an event from another event, but preserve that event's subtype.
-        # Simply using Event(other_event.payload_copy())) overwrites any subtype
-        #  information.
-        new_event = copy.copy(self)
-        new_event._context = {}
-        new_event._payload = self.payload_copy()
-        return new_event
+        e_type = type(self)
+        return e_type(copy.deepcopy(self.payload_copy()))
 
-# @@TODO deprecated.  Factor out these function calls.
 def make_from(other_event):
-    return other_event.clone()
+    # Create an event from another event, but preserve that event's subtype.
+    # Simply using Event(other_event.payload_copy())) overwrites any subtype
+    #  information.
+    e_type = type(other_event)
+    print(e_type)
+    return(e_type(other_event.payload_copy()))

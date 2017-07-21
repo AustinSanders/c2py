@@ -1,20 +1,46 @@
-Receiver1: &Receiver1
-    type  : Receiver
+Architecture1: &Architecture1
+    type     : fw.Architecture
     requests : []
     notifies : []
     arguments: []
-    location : E:/C2Py/examples/message.py
+    location : local
+    elements:
+        Receiver1: &Receiver1
+            type  : Receiver
+            requests : []
+            notifies : []
+            arguments: []
+            elements : []
+            location : E:/C2Py/examples/message.py
 
-Sender1: &Sender1
-    type  : Sender
-    requests : [Router1]
-    notifies : []
-    arguments: []
-    location : E:/C2Py/examples/message.py
+        Receiver2: &Receiver2
+            type  : Receiver
+            requests : []
+            notifies : []
+            arguments: []
+            elements : []
+            location : E:/C2Py/examples/message.py
 
-Router1: &Router1
-    type  : Router
-    requests : [Receiver1]
-    notifies : []
-    arguments: []
-    location : E:/C2Py/examples/message.py
+        Sender1: &Sender1
+            type  : Sender
+            requests : [Router1, Router2]
+            notifies : []
+            arguments: []
+            elements : []
+            location : E:/C2Py/examples/message.py
+
+        Router1: &Router1
+            type  : Router
+            requests : [Receiver1]
+            notifies : []
+            arguments: []
+            elements : []
+            location : E:/C2Py/examples/message.py
+
+        Router2: &Router2
+            type  : Router
+            requests : [Receiver2]
+            notifies : []
+            arguments: []
+            elements : []
+            location : E:/C2Py/examples/message.py

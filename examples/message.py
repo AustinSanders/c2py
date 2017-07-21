@@ -4,12 +4,11 @@ import fw
 from queue import Empty
 import time
 
-
 class Sender(fw.Component):
     def sender_behavior(self):
-        message = input("Give a message to send: ")
-        e = fw.Event({'message':str(message)})
-        self.fire_event_on_interface(e, "bottom")
+        text = input("Give a message to send: ")
+        m = Message(text)
+        self.fire_event_on_interface(m, "bottom")
 
     def description(self):
         description = {
@@ -27,7 +26,8 @@ class Sender(fw.Component):
 class Receiver(fw.Component):
     class RequestHandler():
         def handle(self, event):
-            print("{0} received a notification:\n{1}\n".format(event.payload()['source'], event.payload()['message']))
+            print(event)
+
 
     def receiver_behavior(self):
         for dispatcher in self.event_dispatchers:
@@ -82,10 +82,23 @@ class Router(fw.Connector):
         self.add_event_dispatcher(from_top)
         self.properties["owner"] = self
 
+
+class Message(fw.Event):
+    def __init__(self, text, subject = "No Subject"):
+        super().__init__()
+        self.payload()['text'] = text
+        self.payload()['subject'] = subject
+
+    def __str__(self):
+        return("\nComponent {0}\nSource: {1}\n\tSubject: {2}\n\tBody: {3}\n".format(
+            self.context()['owner'],
+            self.payload()['source'],
+            self.payload()['subject'],
+            self.payload()['text']))
+
+
 if __name__ == "__main__":
     manager = fw.ArchManager('../examples/test.yaml')
-    arch = fw.Architecture(1)
-    arch.set_manager(manager)
     manager.add_all()
     manager.connect_all()
     manager.start_all()

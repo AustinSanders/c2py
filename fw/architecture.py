@@ -3,15 +3,7 @@ sys.path.append(r'E:\C2PY')
 import fw
 
 class Architecture(fw.Component):
-    def set_manager(self, manager):
-        if isinstance(manager, fw.ArchManager):
-            self.add_component("manager", manager)
-            manager.set_architecture(self)
-        else:
-            print("The supplied architecture manager is not a valid"\
-                  "ArchManager object")
-
-    def arch_behavior():
+    def arch_behavior(self):
         pass
 
     def __init__(self, id):

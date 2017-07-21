@@ -1,6 +1,6 @@
 import threading
 from queue import Queue
-#from fw import ArchEventDispatcher
+import fw
 
 
 class ArchElement(threading.Thread):
@@ -8,13 +8,12 @@ class ArchElement(threading.Thread):
     def __init__(self, id, passed_behavior=None):
         super().__init__()
         self.id = id
-        self.interfaces = []
-        self.event_dispatchers = []
+        self.interfaces = [fw.EventInterface("ArchEvent")]
+        self.event_dispatchers = [fw.ArchEventDispatcher("ArchEvent",self)]
         self.properties = {}
         self.elem_status = "SUSPENDED"
         self.behavior = passed_behavior
-        #print("Initialized ArchElem: " + str(id))
-        print("Initialized " + self.__class__.__name__ + ": " + str(id))
+        print("initialized " + str(self))
 
 
     # This class method should return a dictionary after the pattern of the one provided here. It is
@@ -95,7 +94,7 @@ class ArchElement(threading.Thread):
 
     def broadcast_event(self, event):
         for interface in self.interfaces:
-            interface.fire_event(event)
+            interface.fire_event(event.append_source(self.id))
 
     def property_names(self):
         """Returns a list of the names of all properties in the element"""
@@ -115,6 +114,11 @@ class ArchElement(threading.Thread):
             del self.properties[prop]
         else:
             print('No property found with name ' + prop)
+
+    def create_listener(self, dispatcher):
+        """Create an event listener and associate it with a dispatcher"""
+        el = fw.EventListener(0, self.get_event_dispatcher(dispatcher))
+        return el
 
     def __str__(self):
         return "{0}: {1}".format(self.__class__.__name__, self.id)

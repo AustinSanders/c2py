@@ -9,6 +9,9 @@ class ArchEvent(fw.Event):
                     "STOP",
                     "SUSPEND",
                     "RESUME",
+                    "CONNECT_INIT",
+                    "CONNECT_MEDIATE",
+                    "CONNECT_FIN"
                     ]
 
     def __init__(self, e_type, recipient_id):
@@ -19,3 +22,9 @@ class ArchEvent(fw.Event):
 
         super().__init__({'type' :formal_type})
         self._payload['recipient'] = recipient_id
+
+    # No measures are necessary to prevent the mutation of event information
+    #   Due to the fact that arch events are never retransferred.
+
+    def clone(self):
+        return self
