@@ -9,6 +9,12 @@ class Sender(fw.Component):
         text = input("Give a message to send: ")
         m = Message(text)
         self.fire_event_on_interface(m, "bottom")
+        self.n_messages += 1
+        print(self.n_messages)
+
+    def start_behavior(self):
+        self.n_messages = 0
+
 
     def description(self):
         description = {

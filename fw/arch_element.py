@@ -34,11 +34,18 @@ class ArchElement(threading.Thread):
     def behavior(self):
         raise NotImplementedError
 
+    def start_behavior(self):
+        pass
+
+    def stop_behavior(self):
+        pass
+
     # DO NOT OVERRIDE:
     #   To specify behavior for an ArchElement override its 'behavior' method.
     # Check for any ArchEvents and do the appropriate thing based on the event type. Then run
     # behavior.
     def run(self):
+        self.start_behavior()
         while True:
             if self.elem_status == "STOPPED":
                 break
@@ -62,6 +69,7 @@ class ArchElement(threading.Thread):
     # Prepares the ArchElement for deletion or removal from the architecture and halts its activity.
     # NOTE: Stopped ArchElements should ignore events received after they are stopped
     def stop(self):
+        self.stop_behavior()
         self.elem_status = "STOPPED"
 
 
