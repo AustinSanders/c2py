@@ -1,5 +1,5 @@
 Architecture1: &Architecture1
-    type     : fw.Architecture
+    type     : fw.ComplexComponent
     requests : []
     notifies : []
     arguments: []

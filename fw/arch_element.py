@@ -10,10 +10,10 @@ class ArchElement(threading.Thread):
         self.id = id
         self.interfaces = [fw.EventInterface("ArchEvent")]
         self.event_dispatchers = [fw.ArchEventDispatcher("ArchEvent",self)]
+        self.parameters_of_interest = {}
         self.properties = {}
         self.elem_status = "SUSPENDED"
         self.behavior = passed_behavior
-        print("initialized " + str(self))
 
 
     # This class method should return a dictionary after the pattern of the one provided here. It is

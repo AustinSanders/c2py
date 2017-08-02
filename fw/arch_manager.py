@@ -5,28 +5,17 @@ import fw
 import importlib.util
 
 
-class ArchManager(fw.Component):
+class ArchManager(fw.ComplexComponent):
     """ Manages an architecture."""
 
-    def __init__(self, model_file):
+    def __init__(self, model_file, constraint_checker = None):
         super().__init__("manager", self.management_behavior)
+        if constraint_checker == None:
+            pass
+            #constraint_checker = fw.ConstraintChecker()
         self.model_file = model_file
         self.model = self.read_yaml(model_file)
 
-
-    def get_element(self, element_id):
-        """ Returns an element from the architectures list of components or
-        connectors.
-
-        Keyword arguments:
-        element_id -- The unique id of the element that we wish to return.
-        """
-        element = None
-        if element_id in self.architecture.components:
-            element = self.architecture.components[element_id]
-        elif element_id in self.architecture.connectors:
-            element = self.architecture.connectors[element_id]
-        return element
 
 
     def read_yaml(self, model_file):
@@ -36,11 +25,7 @@ class ArchManager(fw.Component):
 
 
     def management_behavior(self):
-        print("Managing: ")
-        print(self.model)
-        print()
-        time.sleep(1)
-
+        pass
 
     def add_element(self, element_id, class_name, location, args = [], arch_id = None):
         element_type = None
@@ -50,12 +35,7 @@ class ArchManager(fw.Component):
             element_type = fw.util.get_external_class(class_name,location)
         # @@TODO nested architectures / subarchitectures
         new_element = element_type(element_id, *args)
-        #if isinstance(new_element, fw.Architecture):
-            #arch_dispatcher = fw.ArchEventDispatcher('ArchEvent', new_element)
-            ## @@TODO get connection ID instead of 0
-            #fw.util.connect([self, 'ArchEvent'], [new_element, "ArchEvent"],0)
-            # self.add_architecture(new_element)
-        if isinstance(new_element, fw.Component):
+        if isinstance(new_element, fw.ArchElement):
             arch_dispatcher = fw.ArchEventDispatcher('ArchEvent', new_element)
             # @@TODO get connection ID instead of 0
             fw.util.connect([self, 'ArchEvent'], [new_element, "ArchEvent"],0)
@@ -63,7 +43,7 @@ class ArchManager(fw.Component):
             # self.add_architecture(new_element)
         else:
             print("Element of type " + class_name + " is not a valid " +
-                    "component or connector.")
+                    "architectural element.")
 
 
     def add_all(self, model = None, arch = None):
@@ -123,6 +103,4 @@ class ArchManager(fw.Component):
 
 if __name__ == '__main__':
     aem = fw.ArchManager('../examples/test.yaml')
-    arch = fw.Architecture(1)
-    arch.set_manager(aem)
     aem.start()
