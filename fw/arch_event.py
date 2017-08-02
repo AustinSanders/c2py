@@ -11,7 +11,8 @@ class ArchEvent(fw.Event):
                     "RESUME",
                     "CONNECT_INIT",
                     "CONNECT_MEDIATE",
-                    "CONNECT_FIN"
+                    "CONNECT_FIN",
+                    "EXEC" # requires a 'command' and 'args' where args is a list
                     ]
 
     def __init__(self, e_type, recipient_id):

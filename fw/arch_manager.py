@@ -27,7 +27,7 @@ class ArchManager(fw.ComplexComponent):
     def management_behavior(self):
         pass
 
-    def add_element(self, element_id, class_name, location, args = [], arch_id = None):
+    def add_element(self, element_id, class_name, location, args = [], parent = None):
         element_type = None
         if location == 'local':
             element_type = fw.util.get_local_class(class_name)
@@ -37,25 +37,30 @@ class ArchManager(fw.ComplexComponent):
         new_element = element_type(element_id, *args)
         if isinstance(new_element, fw.ArchElement):
             arch_dispatcher = fw.ArchEventDispatcher('ArchEvent', new_element)
-            # @@TODO get connection ID instead of 0
+            # @@TODO get connection ID instead of 0 and 1
             fw.util.connect([self, 'ArchEvent'], [new_element, "ArchEvent"],0)
             fw.util.connect([new_element, 'ArchEvent'], [self, 'ArchEvent'],1)
+            if parent is not None:
+                e = fw.ArchEvent('EXEC', parent)
+                e.payload()['function'] = 'add_component'
+                e.payload()['args'] = [element_id, new_element]
+                self.fire_event_on_interface(e, 'ArchEvent')
             # self.add_architecture(new_element)
         else:
             print("Element of type " + class_name + " is not a valid " +
                     "architectural element.")
 
 
-    def add_all(self, model = None, arch = None):
+    def add_all(self, model = None, parent = None):
         if model == None:
             model = self.model
         for elem in model:
             c_name = model[elem]['type']
             args = model[elem]['arguments']
             location = model[elem]['location']
-            self.add_element(elem,c_name, location, args)
+            self.add_element(elem,c_name, location, args, parent)
             try:
-                # If the element has nested elements, consider it an architecture
+                # If the element has nested elements, it is a complex component
                 self.add_all(model[elem]['elements'], elem)
             except(KeyError):
                 pass

@@ -17,6 +17,9 @@ class ArchEventDispatcher(fw.EventDispatcher):
                 elif e_type == "RESUME":
                     self.owner.resume()
                 elif e_type == "CONNECT_INIT":
+                    # Initiate the connection process by requesting that an
+                    #  element creates a listener object and passes it back
+                    #  in a message.
                     listener = self.owner.create_listener(event.payload()['dispatcher'])
                     e = fw.ArchEvent("CONNECT_MEDIATE", "manager")
                     e.payload()['interface'] = event.payload()['interface']
@@ -24,12 +27,20 @@ class ArchEventDispatcher(fw.EventDispatcher):
                     e.payload()['listener'] = listener
                     self.owner.fire_event_on_interface(e, "ArchEvent")
                 elif e_type == "CONNECT_MEDIATE":
+
                     e = fw.ArchEvent("CONNECT_FIN", event.payload()['target'])
                     e.payload()['interface'] = event.payload()['interface']
                     e.payload()['listener'] = event.payload()['listener']
                     self.owner.fire_event_on_interface(e, "ArchEvent")
                 elif e_type == "CONNECT_FIN":
+                    # Finalize a connection by placing the listener in a
+                    #  component's outgoing message interface.
                     fw.util.connect([self.owner, event.payload()['interface']], event.payload()['listener'],0)
+                elif e_type == "EXEC":
+                    # Give a direct order to a component
+                    func = getattr(self.owner, event.payload()['function'])
+                    args = event.payload()['args']
+                    func(*args)
 
 
 
