@@ -6,7 +6,8 @@ class ArchEventDispatcher(fw.EventDispatcher):
 
         def handle(self, event):
             # @@ TODO differentiate or combine start / resume
-            if event.payload()['recipient'] == self.owner.id:
+            if event.payload()['recipient'] == self.owner.id or \
+               event.payload()['recipient'] == '\\all':
                 e_type = event.payload()['type']
                 if e_type == "START":
                     self.owner.resume()
@@ -41,6 +42,11 @@ class ArchEventDispatcher(fw.EventDispatcher):
                     func = getattr(self.owner, event.payload()['function'])
                     args = event.payload()['args']
                     func(*args)
+                elif e_type == "MONITOR_REQUEST":
+                    self.owner.monitor_poi()
+                elif e_type == "MONITOR_RESPONSE":
+                    # @@TODO
+                    print(event.payload()['parameters'])
 
 
 

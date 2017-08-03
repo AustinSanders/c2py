@@ -1,5 +1,7 @@
 import yaml
 import sys
+import time
+from queue import Empty
 sys.path.append(r'E:\C2PY')
 import fw
 import importlib.util
@@ -15,7 +17,7 @@ class ArchManager(fw.ComplexComponent):
             #constraint_checker = fw.ConstraintChecker()
         self.model_file = model_file
         self.model = self.read_yaml(model_file)
-
+        self.time_since_monitor = time.time()
 
 
     def read_yaml(self, model_file):
@@ -25,16 +27,32 @@ class ArchManager(fw.ComplexComponent):
 
 
     def management_behavior(self):
-        pass
+        # @@TODO allow for adjustable polling time
+        # if 3 seconds have passed since the last time we monitored
+        if (time.time() - self.time_since_monitor) > 3:
+            self.time_since_monitor = time.time()
+            self.request_monitor('\\all')
 
-    def add_element(self, element_id, class_name, location, args = [], parent = None):
+        for dispatcher in self.event_dispatchers:
+            try:
+                dispatcher.dispatch_event()
+            except Empty:
+                pass
+
+    def request_monitor(self, recipient):
+        e = fw.ArchEvent('MONITOR_REQUEST', recipient)
+        self.fire_event_on_interface(e,'ArchEvent')
+
+
+    def add_element(self, element_id, class_name, location, args = [], poi = [], parent = None):
         element_type = None
         if location == 'local':
             element_type = fw.util.get_local_class(class_name)
         else:
             element_type = fw.util.get_external_class(class_name,location)
-        # @@TODO nested architectures / subarchitectures
         new_element = element_type(element_id, *args)
+        for param in poi:
+            new_element.add_poi(param)
         if isinstance(new_element, fw.ArchElement):
             arch_dispatcher = fw.ArchEventDispatcher('ArchEvent', new_element)
             # @@TODO get connection ID instead of 0 and 1
@@ -45,7 +63,6 @@ class ArchManager(fw.ComplexComponent):
                 e.payload()['function'] = 'add_component'
                 e.payload()['args'] = [element_id, new_element]
                 self.fire_event_on_interface(e, 'ArchEvent')
-            # self.add_architecture(new_element)
         else:
             print("Element of type " + class_name + " is not a valid " +
                     "architectural element.")
@@ -58,7 +75,8 @@ class ArchManager(fw.ComplexComponent):
             c_name = model[elem]['type']
             args = model[elem]['arguments']
             location = model[elem]['location']
-            self.add_element(elem,c_name, location, args, parent)
+            poi = model[elem]['parameters_of_interest']
+            self.add_element(elem,c_name, location, args,poi, parent)
             try:
                 # If the element has nested elements, it is a complex component
                 self.add_all(model[elem]['elements'], elem)

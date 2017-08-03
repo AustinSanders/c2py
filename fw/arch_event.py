@@ -12,7 +12,9 @@ class ArchEvent(fw.Event):
                     "CONNECT_INIT",
                     "CONNECT_MEDIATE",
                     "CONNECT_FIN",
-                    "EXEC" # requires a 'command' and 'args' where args is a list
+                    "EXEC", # requires a command and 'args' where args is a list
+                    "MONITOR_REQUEST",
+                    "MONITOR_RESPONSE"
                     ]
 
     def __init__(self, e_type, recipient_id):

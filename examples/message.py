@@ -6,11 +6,15 @@ import time
 
 class Sender(fw.Component):
     def sender_behavior(self):
+        for dispatcher in self.event_dispatchers:
+            try:
+                dispatcher.dispatch_event()
+            except Empty:
+                pass
         text = input("Give a message to send: ")
         m = Message(text)
         self.fire_event_on_interface(m, "bottom")
         self.n_messages += 1
-        print(self.n_messages)
 
     def start_behavior(self):
         self.n_messages = 0
@@ -108,3 +112,4 @@ if __name__ == "__main__":
     manager.add_all()
     manager.connect_all()
     manager.start_all()
+    manager.resume()
