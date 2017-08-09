@@ -12,6 +12,7 @@ class ArchElement(threading.Thread):
         self.event_dispatchers = [fw.ArchEventDispatcher("ArchEvent",self)]
         self.parameters_of_interest = []
         self.properties = {}
+        self.connections = []
         self.elem_status = "SUSPENDED"
         self.behavior = passed_behavior
 
@@ -88,6 +89,17 @@ class ArchElement(threading.Thread):
         component's stop behavior before changing its status."""
         self.stop_behavior()
         self.elem_status = "STOPPED"
+        self.remove()
+
+
+    def remove(self):
+        """Disconnects a component by removing its interfaces, dispatchers, and
+        listeners."""
+        for i in self.interfaces:
+            self.remove_interface(i.id)
+
+        for i in self.event_dispatchers:
+            self.remove_event_dispatcher(i.id)
 
 
     def add_interface(self, interface):
@@ -117,7 +129,7 @@ class ArchElement(threading.Thread):
 
 
     def remove_event_dispatcher(self, event_dispatcher_id):
-        self.event_dispatchers.remove(self.get_event_dispatcher(id))
+        self.event_dispatchers.remove(self.get_event_dispatcher(event_dispatcher_id))
 
 
     def fire_event_on_interface(self, event, interface_id):
