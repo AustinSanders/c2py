@@ -2,6 +2,8 @@ Architecture1: &Architecture1
     type     : fw.ComplexComponent
     requests : []
     notifies : []
+    produces : []
+    consumes : []
     arguments: []
     location : local
     parameters_of_interest: []
@@ -11,6 +13,8 @@ Architecture1: &Architecture1
             requests : []
             notifies : []
             arguments: []
+            produces : []
+            consumes : []
             parameters_of_interest: []
             elements : []
             location : E:/C2Py/examples/message.py
@@ -19,6 +23,8 @@ Architecture1: &Architecture1
             type  : Receiver
             requests : []
             notifies : []
+            produces : []
+            consumes : []
             arguments: []
             parameters_of_interest: []
             elements : []
@@ -28,6 +34,8 @@ Architecture1: &Architecture1
             type  : Sender
             requests : [Router1, Router2]
             notifies : []
+            produces : []
+            consumes : []
             arguments: []
             parameters_of_interest: [n_messages]
             elements : []
@@ -37,6 +45,8 @@ Architecture1: &Architecture1
             type  : Router
             requests : [Receiver1]
             notifies : []
+            produces : []
+            consumes : []         
             arguments: []
             parameters_of_interest: []
             elements : []
@@ -46,6 +56,8 @@ Architecture1: &Architecture1
             type  : Router
             requests : [Receiver2]
             notifies : []
+            produces : []
+            consumes : []
             arguments: []
             parameters_of_interest: []
             elements : []
