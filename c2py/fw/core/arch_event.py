@@ -1,6 +1,6 @@
-import fw
+from c2py.fw.core import Event
 
-class ArchEvent(fw.Event):
+class ArchEvent(Event):
 
     """An event sent by the ArchitectureManager containing commands to be carried out by components,
     specifically commands to start, stop, suspend, and resume activity."""

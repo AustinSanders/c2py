@@ -1,15 +1,14 @@
 import threading
 from queue import Queue
-import fw
-
+from c2py.fw.core import EventInterface, ArchEventDispatcher, ArchEvent, EventListener
 
 class ArchElement(threading.Thread):
 
     def __init__(self, id, passed_behavior=None):
         super().__init__()
         self.id = id
-        self.interfaces = [fw.EventInterface("ArchEvent")]
-        self.event_dispatchers = [fw.ArchEventDispatcher("ArchEvent",self)]
+        self.interfaces = [EventInterface("ArchEvent")]
+        self.event_dispatchers = [ArchEventDispatcher("ArchEvent",self)]
         self.parameters_of_interest = []
         self.properties = {}
         self.connections = []
@@ -149,7 +148,7 @@ class ArchElement(threading.Thread):
         return prop_names
 
     def monitor_poi(self):
-        e = fw.ArchEvent('MONITOR_RESPONSE','manager')
+        e = ArchEvent('MONITOR_RESPONSE','manager')
         e.payload()['parameters'] = {}
         for key in self.parameters_of_interest:
             try:
@@ -183,7 +182,7 @@ class ArchElement(threading.Thread):
 
     def create_listener(self, dispatcher):
         """Create an event listener and associate it with a dispatcher"""
-        el = fw.EventListener(0, self.get_event_dispatcher(dispatcher))
+        el = EventListener(0, self.get_event_dispatcher(dispatcher))
         return el
 
 

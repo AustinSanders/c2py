@@ -1,7 +1,7 @@
 import sys
-sys.path.append(r'E:\C2Py')
-import fw
+import c2py.fw.core
 import importlib.util
+import importlib
 
 def get_external_class(class_name, location):
     """ Responsible for importing a class that is not known at time of
@@ -18,16 +18,16 @@ def get_external_class(class_name, location):
 
 def get_local_class(class_name):
     """ Dynamically return a class from a module that has already been imported"""
-    mod_description, c_name = class_name.split('.')
-    mod = __import__(mod_description)
+    mod_description, c_name = class_name.rsplit('.',1)
+    mod = importlib.import_module(mod_description)
     return getattr(mod, c_name)
 
 def connect(interface_pair, dispatcher, id):
     el = None
     #if dispatcher is a list, create a new event listener
     if isinstance(dispatcher, list):
-        el = fw.EventListener(id, dispatcher[0].get_event_dispatcher(dispatcher[1]))
-    elif isinstance(dispatcher, fw.EventListener):
+        el = EventListener(id, dispatcher[0].get_event_dispatcher(dispatcher[1]))
+    elif isinstance(dispatcher, EventListener):
         el = dispatcher
     else:
         print("Unable to connect " + str(interface_pair[0]))

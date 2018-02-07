@@ -1,6 +1,5 @@
 import sys
-sys.path.append(r'E:\C2Py')
-import fw
+import c2py.fw.core as fw
 from queue import Empty
 import time
 

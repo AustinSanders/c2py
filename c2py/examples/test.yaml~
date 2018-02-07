@@ -1,5 +1,5 @@
 Architecture1: &Architecture1
-    type     : fw.ComplexComponent
+    type     : c2py.fw.core.ComplexComponent
     requests : []
     notifies : []
     produces : []
@@ -17,7 +17,7 @@ Architecture1: &Architecture1
             consumes : []
             parameters_of_interest: []
             elements : []
-            location : E:/C2Py/examples/message.py
+            location : /Users/Austin/c2py/c2py/examples/message.py
 
         Receiver2: &Receiver2
             type  : Receiver
@@ -28,7 +28,7 @@ Architecture1: &Architecture1
             arguments: []
             parameters_of_interest: []
             elements : []
-            location : E:/C2Py/examples/message.py
+            location : /Users/Austin/c2py/c2py/examples/message.py
 
         Sender1: &Sender1
             type  : Sender
@@ -39,18 +39,18 @@ Architecture1: &Architecture1
             arguments: []
             parameters_of_interest: [n_messages]
             elements : []
-            location : E:/C2Py/examples/message.py
+            location : /Users/Austin/c2py/c2py/examples/message.py
 
         Router1: &Router1
             type  : Router
             requests : [Receiver1]
             notifies : []
             produces : []
-            consumes : []         
+	    consumes : []
             arguments: []
             parameters_of_interest: []
             elements : []
-            location : E:/C2Py/examples/message.py
+            location : /Users/Austin/c2py/c2py/examples/message.py
 
         Router2: &Router2
             type  : Router
@@ -61,4 +61,4 @@ Architecture1: &Architecture1
             arguments: []
             parameters_of_interest: []
             elements : []
-            location : E:/C2Py/examples/message.py
+            location : /Users/Austin/c2py/c2py/examples/message.py

@@ -1,6 +1,6 @@
-import fw
+from c2py.fw.core import ArchElement
 
-class Component(fw.ArchElement):
+class Component(ArchElement):
 
     def behavior(self):
         for dispatcher in self.event_dispatchers:

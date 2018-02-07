@@ -2,19 +2,19 @@ import yaml
 import sys
 import time
 from queue import Empty
-sys.path.append(r'E:\C2PY')
-import fw
+from c2py.fw.core import ComplexComponent, ArchEvent, ArchElement, ArchEventDispatcher, EventListener
+from c2py.fw.util import util as util
 import importlib.util
 
 
-class ArchManager(fw.ComplexComponent):
+class ArchManager(ComplexComponent):
     """ Manages an architecture."""
 
     def __init__(self, model_file, constraint_checker = None):
         super().__init__("manager", self.management_behavior)
         if constraint_checker == None:
             pass
-            #constraint_checker = fw.ConstraintChecker()
+            #constraint_checker = ConstraintChecker()
         self.model_file = model_file
         self.textual_model = self.read_model_file(model_file)
         self.model = self.read_yaml(self.textual_model)
@@ -48,26 +48,26 @@ class ArchManager(fw.ComplexComponent):
                 pass
 
     def request_monitor(self, recipient):
-        e = fw.ArchEvent('MONITOR_REQUEST', recipient)
+        e = ArchEvent('MONITOR_REQUEST', recipient)
         self.fire_event_on_interface(e,'ArchEvent')
 
 
     def add_element(self, element_id, class_name, location, args = [], poi = [], parent = None):
         element_type = None
         if location == 'local':
-            element_type = fw.util.get_local_class(class_name)
+            element_type = util.get_local_class(class_name)
         else:
-            element_type = fw.util.get_external_class(class_name,location)
+            element_type = util.get_external_class(class_name,location)
         new_element = element_type(element_id, *args)
         for param in poi:
             new_element.add_poi(param)
-        if isinstance(new_element, fw.ArchElement):
-            arch_dispatcher = fw.ArchEventDispatcher('ArchEvent', new_element)
+        if isinstance(new_element, ArchElement):
+            arch_dispatcher = ArchEventDispatcher('ArchEvent', new_element)
             # @@TODO get connection ID instead of 0 and 1
-            fw.util.connect([self, 'ArchEvent'], [new_element, "ArchEvent"],0)
-            fw.util.connect([new_element, 'ArchEvent'], [self, 'ArchEvent'],1)
+            util.connect([self, 'ArchEvent'], [new_element, "ArchEvent"],0)
+            util.connect([new_element, 'ArchEvent'], [self, 'ArchEvent'],1)
             if parent is not None:
-                e = fw.ArchEvent('EXEC', parent)
+                e = ArchEvent('EXEC', parent)
                 e.payload()['function'] = 'add_component'
                 e.payload()['args'] = [element_id, new_element]
                 self.fire_event_on_interface(e, 'ArchEvent')
@@ -108,7 +108,7 @@ class ArchManager(fw.ComplexComponent):
                 #  in the proper interface.
                 if listener in elems or elem in elems:
                     print('connected')
-                    e = fw.ArchEvent('CONNECT_INIT',listener)
+                    e = ArchEvent('CONNECT_INIT',listener)
                     e.payload()['target'] = elem
                     e.payload()['interface'] = 'top'
                     e.payload()['dispatcher'] = 'notification_dispatcher'
@@ -116,7 +116,7 @@ class ArchManager(fw.ComplexComponent):
             for listener in model[elem]['requests']:
                 if listener in elems or elem in elems:
                     print('connected')
-                    e = fw.ArchEvent('CONNECT_INIT', listener)
+                    e = ArchEvent('CONNECT_INIT', listener)
                     e.payload()['target'] = elem
                     e.payload()['interface'] = 'bottom'
                     e.payload()['dispatcher'] = 'request_dispatcher'
@@ -140,15 +140,15 @@ class ArchManager(fw.ComplexComponent):
         return None
 
     def suspend_element(self, elem_id):
-        e = fw.ArchEvent("SUSPEND", elem_id)
+        e = ArchEvent("SUSPEND", elem_id)
         self.fire_event_on_interface(e, "ArchEvent")
 
     def start_element(self, elem_id):
-        e = fw.ArchEvent("START", elem_id)
+        e = ArchEvent("START", elem_id)
         self.fire_event_on_interface(e, "ArchEvent")
 
     def stop_element(self, elem_id):
-        e = fw.ArchEvent("STOP", elem_id)
+        e = ArchEvent("STOP", elem_id)
         self.fire_event_on_interface(e, "ArchEvent")
 
 
@@ -176,16 +176,16 @@ class ArchManager(fw.ComplexComponent):
                 # sends an event to "listener" which indicates that it should
                 #  prepare an event listener to be sent to a target to be placed
                 #  in the proper interface.
-                e = fw.ArchEvent('CONNECT_INIT',listener)
+                e = ArchEvent('CONNECT_INIT',listener)
                 e.payload()['target'] = elem
                 e.payload()['interface'] = 'top'
                 e.payload()['dispatcher'] = 'notification_dispatcher'
                 self.fire_event_on_interface(e, 'ArchEvent')
                 #l_desc = listener.description()
                 # @@TODO Create actual connection ID, not just 0
-                #fw.util.connect([current, "top"], [listener, "notification_dispatcher"],0)
+                #util.connect([current, "top"], [listener, "notification_dispatcher"],0)
             for listener in model[elem]['requests']:
-                e = fw.ArchEvent('CONNECT_INIT', listener)
+                e = ArchEvent('CONNECT_INIT', listener)
                 e.payload()['target'] = elem
                 e.payload()['interface'] = 'bottom'
                 e.payload()['dispatcher'] = 'request_dispatcher'
@@ -197,7 +197,7 @@ class ArchManager(fw.ComplexComponent):
 
 
     def start_all(self, model = None):
-        e = fw.ArchEvent("START", '\\all')
+        e = ArchEvent("START", '\\all')
         self.fire_event_on_interface(e, "ArchEvent")
 
 
@@ -215,5 +215,5 @@ class ArchManager(fw.ComplexComponent):
 
 
 if __name__ == '__main__':
-    aem = fw.ArchManager('../examples/test.yaml')
+    aem = ArchManager('../examples/test.yaml')
     aem.start()

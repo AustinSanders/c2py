@@ -1,9 +1,8 @@
 import sys
-sys.path.append(r'E:\C2PY')
-import fw
+from c2py.fw.core import Component
 from queue import Empty
 
-class ConstraintChecker(fw.Component):
+class ConstraintChecker(Component):
     """Checks parametric constraints."""
 
     def CCBehavior(self):
