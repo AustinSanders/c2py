@@ -2,6 +2,7 @@ import sys
 from c2py.fw.core import EventListener
 import importlib.util
 import importlib
+from functools import reduce
 
 def get_external_class(class_name, location):
     """ Responsible for importing a class that is not known at time of
@@ -11,10 +12,11 @@ def get_external_class(class_name, location):
     class_name -- the name of that class for which we're searching
     location -- the fully qualified path containing the class.
     """
-    spec = importlib.util.spec_from_file_location("message",location)
+    spec = importlib.util.spec_from_file_location(class_name,location)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return getattr(mod, class_name)
+
 
 def get_local_class(class_name):
     """ Dynamically return a class from a module that has already been imported"""

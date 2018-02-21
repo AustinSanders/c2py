@@ -10,12 +10,13 @@ import importlib.util
 class ArchManager(ComplexComponent):
     """ Manages an architecture."""
 
-    def __init__(self, model_file, constraint_checker = None):
+    def __init__(self, model_file, shared_resource = {}, constraint_checker = None):
         super().__init__("manager", self.management_behavior)
         if constraint_checker == None:
             pass
             #constraint_checker = ConstraintChecker()
         self.model_file = model_file
+        self.shared_resource = shared_resource
         self.textual_model = self.read_model_file(model_file)
         self.model = self.read_yaml(self.textual_model)
         self.time_since_monitor = time.time()
@@ -158,6 +159,10 @@ class ArchManager(ComplexComponent):
         for elem in model:
             c_name = model[elem]['type']
             args = model[elem]['arguments']
+            for i, arg in enumerate(args):
+                if str(arg).startswith("\\*"):
+                    args[i] = self.shared_resource[str(arg)[2:]]
+                print(args[i])
             location = model[elem]['location']
             poi = model[elem]['parameters_of_interest']
             self.add_element(elem,c_name, location, args,poi, parent)

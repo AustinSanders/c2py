@@ -1,0 +1,52 @@
+Pioneer: &Pioneer1
+    type     : PioneerP3DX
+    requests : []
+    notifies : []
+    arguments: []
+    location :  /Users/Austin/c2py/c2py/examples/robotics/line_follower.py
+    parameters_of_interest: []
+    elements:
+        LineAnalyzer1: &LineAnalyzer1
+            type  : LineAnalyzer
+            requests : [Sensor1, Sensor2, Motor1, Motor2]
+            notifies : []
+            arguments: []
+            parameters_of_interest: []
+            elements : []
+            location : /Users/Austin/c2py/c2py/examples/robotics/line_follower.py
+
+        Motor1: &Motor1
+            type  : Motor
+            requests : []
+            notifies : [LineAnalyzer1]
+            arguments: [\*api, Pioneer_p3dx_leftMotor]
+            parameters_of_interest: []
+            elements : []
+            location : /Users/Austin/c2py/c2py/examples/robotics/line_follower.py
+
+        Motor2: &Motor2
+            type  : Motor
+            requests : []
+            notifies : [LineAnalyzer1]
+            arguments: [\*api, Pioneer_p3dx_rightMotor]
+            parameters_of_interest: []
+            elements : []
+            location : /Users/Austin/c2py/c2py/examples/robotics/line_follower.py
+
+        Sensor1: &Sensor1
+            type  : Sensor
+            requests : []
+            notifies : [LineAnalyzer1]
+            arguments: [\*api, LeftRGBSensor]
+            parameters_of_interest: []
+            elements : []
+            location : /Users/Austin/c2py/c2py/examples/robotics/line_follower.py
+
+        Sensor2: &Router2
+            type  : Sensor
+            requests : []
+            notifies : [LineAnalyzer1]
+            arguments: [\*api, RightRGBSensor]
+            parameters_of_interest: []
+            elements : []
+            location : /Users/Austin/c2py/c2py/examples/robotics/line_follower.py
