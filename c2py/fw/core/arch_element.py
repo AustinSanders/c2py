@@ -1,11 +1,16 @@
+import sys
 import threading
-from queue import Queue
+if sys.version_info[0] == '3':
+    from queue import Queue
+else:
+    from Queue import Queue
+
 from c2py.fw.core import EventInterface, ArchEventDispatcher, ArchEvent, EventListener
 
 class ArchElement(threading.Thread):
 
     def __init__(self, id, passed_behavior=None):
-        super().__init__()
+        super(ArchElement,self).__init__()
         self.id = id
         self.interfaces = [EventInterface("ArchEvent")]
         self.event_dispatchers = [ArchEventDispatcher("ArchEvent",self)]
@@ -180,6 +185,7 @@ class ArchElement(threading.Thread):
             print('No property found with name ' + prop)
 
 
+    # @TODO create listeners with knowledge of allowed event types
     def create_listener(self, dispatcher):
         """Create an event listener and associate it with a dispatcher"""
         el = EventListener(0, self.get_event_dispatcher(dispatcher))

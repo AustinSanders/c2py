@@ -1,4 +1,9 @@
-from queue import Queue,Empty
+import sys
+
+if (sys.version_info[0] == 3):
+    from queue import Queue,Empty
+else:
+    from Queue import Queue, Empty
 
 
 class EventDispatcher(Queue):

@@ -1,7 +1,7 @@
 from c2py.fw.core import EventDispatcher, ArchEvent
 from c2py.fw.util import util as util
 
-class ArchEventDispatcher(EventDispatcher):
+class ArchEventDispatcher(EventDispatcher, object):
 
     class ArchEventHandler():
 
@@ -52,5 +52,5 @@ class ArchEventDispatcher(EventDispatcher):
 
 
     def __init__(self, id, owner, blocking=False, timeout=None, throwing=False):
-        super().__init__(id,owner,blocking,timeout,throwing)
+        super(ArchEventDispatcher, self).__init__(id,owner,blocking,timeout,throwing)
         self.add_event_handler(self.ArchEventHandler())

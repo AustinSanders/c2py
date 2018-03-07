@@ -10,13 +10,18 @@ class ComplexComponent(Component):
         self.components = {}
         if behavior == None:
             behavior = self.component_behavior
-        super().__init__(id, behavior)
+        super(ComplexComponent, self).__init__(id, behavior)
 
     def add_component(self, cmp_id, element):
         if cmp_id not in self.components:
             self.components[cmp_id] = element
         else:
             print("Component " + cmp_id + " is already in this architecture!")
+
+    # @@TODO: Allow for nested components to serve as top/bottom
+    #   interfaces to complex component.  Sending event to bottom interface
+    #   of complex component should send events to bottom component in complex
+    #   component so that the subarchitecture can act as a black box.
 
     def get_element(self, element_id):
         """ Returns an element from the architectures list of components or

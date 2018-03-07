@@ -8,7 +8,7 @@ class Component(ArchElement):
 
     def __init__(self, id, passed_behavior=None):
         if passed_behavior is None:
-            super().__init__(id, self.behavior)
+            super(Component, self).__init__(id, self.behavior)
         else:
-            super().__init__(id, passed_behavior)
+            super(Component, self).__init__(id, passed_behavior)
         self.start()

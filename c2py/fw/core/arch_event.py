@@ -1,6 +1,6 @@
 from c2py.fw.core import Event
 
-class ArchEvent(Event):
+class ArchEvent(Event, object):
 
     """An event sent by the ArchitectureManager containing commands to be carried out by components,
     specifically commands to start, stop, suspend, and resume activity."""
@@ -23,7 +23,7 @@ class ArchEvent(Event):
         if formal_type not in self.formal_types:
             raise LookupError
 
-        super().__init__({'type' :formal_type})
+        super(ArchEvent, self).__init__({'type' :formal_type})
         self._payload['recipient'] = recipient_id
 
     # No measures are necessary to prevent the mutation of event information

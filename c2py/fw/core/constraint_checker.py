@@ -1,6 +1,11 @@
 import sys
 from c2py.fw.core import Component
-from queue import Empty
+
+if sys.version_info[0] == '3':
+    from queue import Queue, Empty
+else:
+    from Queue import Queue, Empty
+
 
 class ConstraintChecker(Component):
     """Checks parametric constraints."""
@@ -15,4 +20,4 @@ class ConstraintChecker(Component):
 
 
     def __init__(self):
-        super().__init__('ConstraintChecker', self.CCBehavior)
+        super(ConstraintChecker, self).__init__('ConstraintChecker', self.CCBehavior)

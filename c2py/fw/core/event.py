@@ -1,7 +1,7 @@
 import copy
 
 
-class Event():
+class Event(object):
     """Events are the base unit of communication between ArchElements. Events have two interesting
     properties: they must only be mutated by their creator and must not be mutated after they are
     sent. This is because, to increase the speed of Event passing, Events are passed by reference
@@ -48,7 +48,7 @@ class Event():
         return self._context
 
     def payload_copy(self):
-        return copy.deepcopy(self._payload)
+        return copy.deepcopy(self.payload())
 
     def append_source(self, source):
         try:

@@ -1,17 +1,21 @@
 import yaml
 import sys
 import time
-from queue import Empty
+if sys.version_info[0] == '3':
+    from queue import Queue
+else:
+    from Queue import Queue
+
+
 from c2py.fw.core import ComplexComponent, ArchEvent, ArchElement, ArchEventDispatcher, EventListener
 from c2py.fw.util import util as util
-import importlib.util
 
 
 class ArchManager(ComplexComponent):
     """ Manages an architecture."""
 
     def __init__(self, model_file, shared_resource = {}, constraint_checker = None):
-        super().__init__("manager", self.management_behavior)
+        super(ArchManager, self).__init__("manager", self.management_behavior)
         if constraint_checker == None:
             pass
             #constraint_checker = ConstraintChecker()
