@@ -1,4 +1,5 @@
 import sys
+import time
 
 if (sys.version_info[0] == 3):
     from queue import Queue,Empty
@@ -32,6 +33,7 @@ class EventDispatcher(Queue):
         try:
             current_event = self.get(self.blocking, self.timeout)
             current_event.context()['owner'] = self.owner
+            current_event.context()['proc_begin'] = time.time()
             self.task_done()
             for handler in self.event_handlers:
                 handler.handle(current_event)

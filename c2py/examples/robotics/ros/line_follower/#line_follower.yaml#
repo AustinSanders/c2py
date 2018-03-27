@@ -1,0 +1,61 @@
+LineFollower: &LineFollower1
+    type      : Follower
+    requests  : []
+    notifies  : []
+    arguments : []
+    location  : users/austin/c2py/c2py/examples/robotics/ros/line_follower/line_follower.py
+    parameters_of_interes: []
+    elements:
+	MovementPlanner1: &MovementPlanner1
+	    type : MovementPlanner
+	    requests : [TeleoperationCommander1]
+	    notifies : []
+	    arguments: []
+	    parameters_of_interest: []
+	    elements : []
+	    location : users/austin/c2py/c2py/examples/robotics/ros/line_follower/line_follower.py
+
+	TeleoperationCommander1: &TeleoperationCommander1
+	    type     : TeleoperationCommander
+	    requests : [RosTeleoperationActuator1]
+	    notifies : []
+	    arguments: []
+	    parameters_of_interest: []
+	    elements : []
+	    location : users/austin/c2py/c2py/examples/robotics/ros/line_follower/line_follower.py
+
+	ColorAnalyzer1: &ColorAnalyzer1
+	    type     : ColorAnalyzer
+	    requests : []
+	    notifies : [MovementPlanner1]
+	    arguments: []
+	    parameters_of_interest: []
+	    elements : []
+	    location : users/austin/c2py/c2py/examples/robotics/ros/line_follower/line_follower.py
+
+	ImageTransformer1 : &ImageTransformer1
+	    type     : ImageTransformer
+	    requests : []
+	    notifies : [ColorAnalyzer1]
+	    arguments: []
+	    parameters_of_interest: []
+	    elements : []
+	    location : users/austin/c2py/c2py/examples/robotics/ros/line_follower/line_follower.py
+
+	RosTeleoperationActuator1: &RosTeleoperationActuator1
+	    type     : RosTeleoperationActuator
+	    requests : []
+	    notifies : []
+	    arguments: []
+	    parameters_of_interest: []
+	    elements : []
+	    location : users/austin/c2py/c2py/examples/robotics/ros/line_follower/line_follower.py
+
+	RosImageSensor1 : &RosImageSensor1
+	    type     : RosImageSensor
+	    requests : []
+	    notifies : [ImageTransformer1]
+	    arguments: []
+	    parameters_of_interest: []
+	    elements : []
+	    location : users/austin/c2py/c2py/examples/robotics/ros/line_follower/line_follower.py

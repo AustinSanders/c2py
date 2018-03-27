@@ -28,6 +28,7 @@ else:
     get_external_class = _get_external_class
 
 
+# @TODO this is broken
 def get_local_class(class_name):
     """ Dynamically return a class from a module that has already been imported"""
     mod_description, c_name = class_name.rsplit('.',1)

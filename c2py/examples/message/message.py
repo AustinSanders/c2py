@@ -1,6 +1,11 @@
 import sys
 import c2py.fw.core as fw
-from queue import Empty
+
+if (sys.version_info[0] == 3):
+    from queue import Queue,Empty
+else:
+    from Queue import Queue, Empty
+
 import time
 
 class Sender(fw.Component):
@@ -28,12 +33,12 @@ class Sender(fw.Component):
         return description
 
     def __init__(self, id):
-        super().__init__(id, self.sender_behavior)
+        super(Sender, self).__init__(id, self.sender_behavior)
         self.add_interface(fw.EventInterface("bottom"))
         self.properties["owner"] = self
 
 class Receiver(fw.Component):
-    class RequestHandler():
+    class RequestHandler(fw.EventHandler):
         def handle(self, event):
             print(event)
 
@@ -54,7 +59,7 @@ class Receiver(fw.Component):
         return description
 
     def __init__(self, id):
-        super().__init__(id, self.receiver_behavior)
+        super(Receiver, self).__init__(id, self.receiver_behavior)
         from_top = fw.EventDispatcher("request_dispatcher", self)
         from_top.add_event_handler(self.RequestHandler())
         self.add_event_dispatcher(from_top)
@@ -64,7 +69,7 @@ class Receiver(fw.Component):
 
 class Router(fw.Connector):
 
-    class RequestHandler():
+    class RequestHandler(fw.EventHandler):
         def handle(self, event):
             event.context()['owner'].fire_event_on_interface(event, "bottom")
 
@@ -84,7 +89,7 @@ class Router(fw.Connector):
 
 
     def __init__(self, id):
-        super().__init__(id, self.router_behavior)
+        super(Router, self).__init__(id, self.router_behavior)
         self.add_interface(fw.EventInterface("bottom"))
         from_top = fw.EventDispatcher("request_dispatcher", self)
         from_top.add_event_handler(self.RequestHandler())
@@ -94,7 +99,7 @@ class Router(fw.Connector):
 
 class Message(fw.Event):
     def __init__(self, text, subject = "No Subject"):
-        super().__init__()
+        super(Message, self).__init__()
         self.payload()['text'] = text
         self.payload()['subject'] = subject
 
@@ -107,7 +112,7 @@ class Message(fw.Event):
 
 
 if __name__ == "__main__":
-    manager = fw.ArchManager('../examples/test.yaml')
+    manager = fw.ArchManager('./test.yaml')
     manager.add_all()
     manager.connect_all()
     manager.start_all()

@@ -1,4 +1,5 @@
 import copy
+import time
 
 
 class Event(object):
@@ -37,6 +38,8 @@ class Event(object):
     def __init__(self, payload = {}):
         self._context = {}
         self._payload = payload
+        self._characteristics = {}
+        self.characteristics()['creation_ts'] = time.time()
 
     def __str__(self):
         return (str(self.context()) + " " + str(self.payload()))
@@ -44,11 +47,17 @@ class Event(object):
     def payload(self):
         return self._payload
 
+    def characteristics(self):
+        return self._characteristics
+
     def context(self):
         return self._context
 
     def payload_copy(self):
         return copy.deepcopy(self.payload())
+
+    def characteristics_copy(self):
+        return copy.deepcopy(self.characteristics())
 
     def append_source(self, source):
         try:
@@ -62,11 +71,13 @@ class Event(object):
         return e
 
     def clone(self):
-        # Create an event from another event, but preserve that event's subtype.
-        # Simply using Event(other_event.payload_copy())) overwrites any subtype
-        #  information.
+        """Create an event from another event, but preserve that event's subtype.
+         Simply using Event(other_event.payload_copy())) overwrites any subtype
+          information. 
+"""
         new_event = copy.copy(self)
         new_event._context = {}
+        new_event._characteristics = self.characteristics_copy()
         new_event._payload = self.payload_copy()
         return new_event
 

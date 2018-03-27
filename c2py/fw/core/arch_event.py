@@ -13,6 +13,7 @@ class ArchEvent(Event, object):
                     "CONNECT_MEDIATE",
                     "CONNECT_FIN",
                     "EXEC", # requires a command and 'args' where args is a list
+                    "LOG",
                     "MONITOR_REQUEST",
                     "MONITOR_RESPONSE"
                     ]

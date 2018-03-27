@@ -1,13 +1,14 @@
 import yaml
 import sys
 import time
+import os
 if sys.version_info[0] == '3':
-    from queue import Queue
+    from queue import Empty
 else:
-    from Queue import Queue
+    from Queue import Empty
 
 
-from c2py.fw.core import ComplexComponent, ArchEvent, ArchElement, ArchEventDispatcher, EventListener
+from c2py.fw.core import ComplexComponent, ArchEvent, ArchElement, ArchEventDispatcher, EventListener, EventDispatcher, EventHandler
 from c2py.fw.util import util as util
 
 
@@ -24,6 +25,29 @@ class ArchManager(ComplexComponent):
         self.textual_model = self.read_model_file(model_file)
         self.model = self.read_yaml(self.textual_model)
         self.time_since_monitor = time.time()
+        log_file = os.path.splitext(model_file)[0]+'.log'
+        self.log = open(log_file, 'a+')
+
+
+        #Dispatcher for event logs
+        from_arch = EventDispatcher("FromArch", self)
+        from_arch.add_event_handler(self.LogHandler())
+        self.add_event_dispatcher(from_arch)
+
+    class LogHandler(EventHandler):
+        def handle(self, event):
+            print("handling!")
+            if not isinstance(event, ArchEvent):
+                event.context()['owner'].log.write("{} {} {} {}\n".format(
+                    type(event).__name__,
+                    event.characteristics()['creation_ts'],
+                    event.characteristics()['proc_start_ts'],
+                    event.characteristics()['proc_fin_ts']
+                ))
+                event.context()['owner'].log.flush()
+
+
+
 
 
     def read_model_file(self, model_file):
@@ -71,6 +95,7 @@ class ArchManager(ComplexComponent):
             # @@TODO get connection ID instead of 0 and 1
             util.connect([self, 'ArchEvent'], [new_element, "ArchEvent"],0)
             util.connect([new_element, 'ArchEvent'], [self, 'ArchEvent'],1)
+            util.connect([new_element, 'ArchEvent'], [self, 'FromArch'],2)
             if parent is not None:
                 e = ArchEvent('EXEC', parent)
                 e.payload()['function'] = 'add_component'
@@ -166,7 +191,6 @@ class ArchManager(ComplexComponent):
             for i, arg in enumerate(args):
                 if str(arg).startswith("\\*"):
                     args[i] = self.shared_resource[str(arg)[2:]]
-                print(args[i])
             location = model[elem]['location']
             poi = model[elem]['parameters_of_interest']
             self.add_element(elem,c_name, location, args,poi, parent)

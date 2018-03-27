@@ -1,3 +1,4 @@
+from .event_handler import EventHandler
 from .event_listener import EventListener
 from .event_interface import EventInterface
 from .event_dispatcher import EventDispatcher
