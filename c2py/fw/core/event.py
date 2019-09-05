@@ -31,54 +31,69 @@ class Event(object):
     copied when they are modified instead of every time they pass through a component.
 
     To facilitate this, the payload field is prefixed with an underscore, and access to it is
-    provided by the payload() and payload_copy() methods. This will help remind developers to think
+    provided by the payload and payload_copy() methods. This will help remind developers to think
     about how they are using the payload and whether a copy needs to be made or not. Finally, the
     module level function make_from() facilitates the creation of a new Event from an old one."""
 
     def __init__(self, payload = {}):
-        self._context = {}
-        self._payload = payload
-        self._characteristics = {}
-        self.characteristics()['creation_ts'] = time.time()
+        self.context = {}
+        self.payload = payload
+        self.characteristics = {}
+        self.characteristics['creation_ts'] = time.time()
 
     def __str__(self):
-        return (str(self.context()) + " " + str(self.payload()))
+        return (str(self.context) + " " + str(self.payload))
 
+    @property
     def payload(self):
         return self._payload
 
+    @payload.setter
+    def payload(self, val):
+        self._payload = val
+
+    @property
     def characteristics(self):
         return self._characteristics
 
+    @characteristics.setter
+    def characteristics(self, val):
+        self._characteristics = val
+
+    @property
     def context(self):
         return self._context
 
+    @context.setter
+    def context(self, val):
+        self._context = val
+
     def payload_copy(self):
-        return copy.deepcopy(self.payload())
+        return copy.deepcopy(self.payload)
 
     def characteristics_copy(self):
-        return copy.deepcopy(self.characteristics())
+        return copy.deepcopy(self.characteristics)
 
     def append_source(self, source):
         try:
-            self._payload["source"]
+            self.payload["source"]
         except KeyError:
             e = make_from(self)
-            e._payload["source"] = source
+            e.payload["source"] = source
             return e
         e = make_from(self)
-        e._payload['source'] = e._payload['source'] + ' ' +source
+        e.payload['source'] = e.payload['source'] + ' ' +source
         return e
 
     def clone(self):
         """Create an event from another event, but preserve that event's subtype.
          Simply using Event(other_event.payload_copy())) overwrites any subtype
-          information. 
+          information.
 """
         new_event = copy.copy(self)
-        new_event._context = {}
-        new_event._characteristics = self.characteristics_copy()
-        new_event._payload = self.payload_copy()
+        new_event.context = {}
+        new_event.characteristics = self.characteristics_copy()
+        new_event.payload = self.payload_copy()
         return new_event
 
 # @@TODO deprecated.  Factor out these function calls.

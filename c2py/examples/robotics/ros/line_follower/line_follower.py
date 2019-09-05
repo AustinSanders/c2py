@@ -82,12 +82,12 @@ class MovementPlanner(fw.Component):
     class NotificationHandler():
         def handle(self, event):
             try:
-                image = event.payload()['raw_image']
-                M = event.payload()['masked_image']
+                image = event.payload['raw_image']
+                M = event.payload['masked_image']
                 if M['m00'] > 0:
                     cx = int(M['m10']/M['m00'])
                     cy = int(M['m01']/M['m00'])
-                    event.context()['owner'].fire_event_on_interface(MovementPlan(cx, cy, image), "bottom")
+                    event.context['owner'].fire_event_on_interface(MovementPlan(cx, cy, image), "bottom")
             except:
                 pass
 
@@ -122,9 +122,9 @@ class ColorAnalyzer(fw.Component):
     class NotificationHandler():
         def handle(self, event):
             try:
-                parent = event.context()['owner']
-                raw = event.payload()['raw']
-                hsv = event.payload()['hsv']
+                parent = event.context['owner']
+                raw = event.payload['raw']
+                hsv = event.payload['hsv']
                 mask = cv2.inRange(hsv, parent.lower_yellow, parent.upper_yellow)
                 h,w,d = raw.shape
                 search_top = 3*h/4
@@ -162,8 +162,8 @@ class ImageTransformer(fw.Component):
     class NotificationHandler():
         def handle(self, event):
             try:
-                parent = event.context()['owner']
-                raw = event.payload()['image']
+                parent = event.context['owner']
+                raw = event.payload['image']
                 transformed = cv2.cvtColor(raw, cv2.COLOR_BGR2HSV)
                 parent.fire_event_on_interface(HSVImageData(transformed, raw), "top")
             except:
@@ -198,11 +198,11 @@ class TeleoperationCommander(fw.Component):
     class RequestHandler():
         def handle(self, event):
             try:
-                parent = event.context()['owner']
-                image = event.payload()['image']
+                parent = event.context['owner']
+                image = event.payload['image']
                 _,w,_ = image.shape
-                cx = event.payload()['cx']
-                cy = event.payload()['cy']
+                cx = event.payload['cx']
+                cy = event.payload['cy']
                 cv2.circle(image, (cx, cy), 20, (0,0,255), -1)
                 err = cx - w/2
                 parent.fire_event_on_interface(MovementCommand(0.2, err), "bottom")
@@ -238,9 +238,9 @@ class RosTeleoperationActuator(fw.Component):
     class RequestHandler():
         def handle(self, event):
             try:
-                parent = event.context()['owner']
-                x = event.payload()['x']
-                z = event.payload()['z']
+                parent = event.context['owner']
+                x = event.payload['x']
+                z = event.payload['z']
                 parent.twist.linear.x = 0.2
                 parent.twist.angular.z = -float(z) / 100
                 parent.cmd_vel_pub.publish(parent.twist)
@@ -306,32 +306,32 @@ class RosImageSensor(fw.Component):
 class RawImageData(fw.Event):
     def __init__(self, raw_image):
         super(RawImageData, self).__init__()
-        self.payload()['image'] = raw_image
+        self.payload['image'] = raw_image
 
 class HSVImageData(fw.Event):
     def __init__(self, hsv_image, raw_image):
         super(HSVImageData, self).__init__()
-        self.payload()['hsv'] = hsv_image
-        self.payload()['raw'] = raw_image
+        self.payload['hsv'] = hsv_image
+        self.payload['raw'] = raw_image
 
 class MaskedImage(fw.Event):
     def __init__(self, masked_image, raw_image):
         super(MaskedImage, self).__init__()
-        self.payload()['masked_image'] = masked_image
-        self.payload()['raw_image'] = raw_image
+        self.payload['masked_image'] = masked_image
+        self.payload['raw_image'] = raw_image
 
 class MovementPlan(fw.Event):
     def __init__(self, cx, cy, image):
         super(MovementPlan, self).__init__()
-        self.payload()['cx'] = cx
-        self.payload()['cy'] = cy
-        self.payload()['image'] = image
+        self.payload['cx'] = cx
+        self.payload['cy'] = cy
+        self.payload['image'] = image
 
 class MovementCommand(fw.Event):
     def __init__(self, x, z):
         super(MovementCommand, self).__init__()
-        self.payload()['x'] = x
-        self.payload()['z'] = z
+        self.payload['x'] = x
+        self.payload['z'] = z
 
 
 if __name__ == "__main__":

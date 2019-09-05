@@ -21,11 +21,11 @@ class LineAnalyzer(fw.Component):
     class NotificationHandler():
         def handle(self, event):
             if (isinstance(event, SensorNotification)):
-                val = event.payload()['val']
-                if (event.payload()['lr'] == 'LeftRGBSensor'):
-                    event.context()['owner'].l_color = val
+                val = event.payload['val']
+                if (event.payload['lr'] == 'LeftRGBSensor'):
+                    event.context['owner'].l_color = val
                 else:
-                    event.context()['owner'].r_color = val
+                    event.context['owner'].r_color = val
 
     def get_directive(self):
         if self.l_color > 10:
@@ -53,9 +53,9 @@ class Motor(fw.Component):
     class RequestHandler():
         def handle(self, event):
             if instanceof(event, MovementRequest):
-                speed = event.payload()['speed']
-                directive = event.payload()['directive']
-                event.context()['owner'].actuate(directive, speed)
+                speed = event.payload['speed']
+                directive = event.payload['directive']
+                event.context['owner'].actuate(directive, speed)
 
     def __init__(self, id, api, actuant_name):
         # @@TODO automate this / provide default behavior
@@ -102,10 +102,10 @@ class Sensor(fw.Component):
         def handle(self, event):
             print("got event")
             if isinstance(event, SensorRequest):
-                lr = event.payload()['lr']
-                val = event.context()['owner'].actuate(lr)
+                lr = event.payload['lr']
+                val = event.context['owner'].actuate(lr)
                 response = SensorNotification(self._lr, val)
-                event.context()['owner'].fire_event_on_interface(response, "top")
+                event.context['owner'].fire_event_on_interface(response, "top")
                 print("sensor actuated and sent!")
 
     def _lr(self):
@@ -147,19 +147,19 @@ class Sensor(fw.Component):
 class MovementRequest(fw.Event):
     def __init__(self, directive, speed = 2):
         super().__init__()
-        self.payload()['directive'] = directive
-        self.payload()['speed'] = speed
+        self.payload['directive'] = directive
+        self.payload['speed'] = speed
 
 class SensorRequest(fw.Event):
     def __init__(self, lr = 'b'):
         super().__init__()
-        self.payload()['lr'] = lr
+        self.payload['lr'] = lr
 
 class SensorNotification(fw.Event):
     def __init__(self, lr, val):
         super().__init__()
-        self.payload()['lr'] = lr
-        self.payload()['val'] = val
+        self.payload['lr'] = lr
+        self.payload['val'] = val
 
 if __name__ == "__main__":
     with VRep.connect("127.0.0.1", 19999) as api:

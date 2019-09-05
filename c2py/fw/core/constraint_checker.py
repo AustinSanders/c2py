@@ -1,7 +1,7 @@
 import sys
 from c2py.fw.core import Component
 
-if sys.version_info[0] == '3':
+if sys.version_info[0] == 3:
     from queue import Queue, Empty
 else:
     from Queue import Queue, Empty

@@ -2,7 +2,7 @@ import sys
 import c2py.fw.core as fw
 
 if (sys.version_info[0] == 3):
-    from queue import Queue,Empty
+    from queue import Queue, Empty
 else:
     from Queue import Queue, Empty
 
@@ -71,7 +71,7 @@ class Router(fw.Connector):
 
     class RequestHandler(fw.EventHandler):
         def handle(self, event):
-            event.context()['owner'].fire_event_on_interface(event, "bottom")
+            event.context['owner'].fire_event_on_interface(event, "bottom")
 
     def router_behavior(self):
         for dispatcher in self.event_dispatchers:
@@ -100,15 +100,15 @@ class Router(fw.Connector):
 class Message(fw.Event):
     def __init__(self, text, subject = "No Subject"):
         super(Message, self).__init__()
-        self.payload()['text'] = text
-        self.payload()['subject'] = subject
+        self.payload['text'] = text
+        self.payload['subject'] = subject
 
     def __str__(self):
         return("\nComponent {0}\nSource: {1}\n\tSubject: {2}\n\tBody: {3}\n".format(
-            self.context()['owner'],
-            self.payload()['source'],
-            self.payload()['subject'],
-            self.payload()['text']))
+            self.context['owner'],
+            self.payload['source'],
+            self.payload['subject'],
+            self.payload['text']))
 
 
 if __name__ == "__main__":

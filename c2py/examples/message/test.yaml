@@ -13,7 +13,7 @@ Architecture1: &Architecture1
             arguments: []
             parameters_of_interest: []
             elements : []
-            location : /home/austin/c2py/c2py/examples/message/message.py
+            location : /Users/austin/c2py/c2py/examples/message/message.py
 
         Receiver2: &Receiver2
             type  : Receiver
@@ -22,7 +22,7 @@ Architecture1: &Architecture1
             arguments: []
             parameters_of_interest: []
             elements : []
-            location : /home/austin/c2py/c2py/examples/message/message.py
+            location : /Users/austin/c2py/c2py/examples/message/message.py
 
         Sender1: &Sender1
             type  : Sender
@@ -31,7 +31,7 @@ Architecture1: &Architecture1
             arguments: []
             parameters_of_interest: [n_messages]
             elements : []
-            location : /home/austin/c2py/c2py/examples/message/message.py
+            location : /Users/austin/c2py/c2py/examples/message/message.py
 
         Router1: &Router1
             type  : Router
@@ -40,7 +40,7 @@ Architecture1: &Architecture1
             arguments: []
             parameters_of_interest: []
             elements : []
-            location : /home/austin/c2py/c2py/examples/message/message.py
+            location : /Users/austin/c2py/c2py/examples/message/message.py
 
         Router2: &Router2
             type  : Router
@@ -49,4 +49,4 @@ Architecture1: &Architecture1
             arguments: []
             parameters_of_interest: []
             elements : []
-            location : /home/austin/c2py/c2py/examples/message/message.py
+            location : /Users/austin/c2py/c2py/examples/message/message.py

@@ -1,37 +1,39 @@
+from c2py.fw.core import EventInterface, ArchEventDispatcher, ArchEvent, EventListener
 import sys
 import threading
-if sys.version_info[0] == '3':
+
+if sys.version_info[0] == 3:
     from queue import Queue
 else:
     from Queue import Queue
 
-from c2py.fw.core import EventInterface, ArchEventDispatcher, ArchEvent, EventListener
 
 class ArchElement(threading.Thread):
 
     def __init__(self, id, passed_behavior=None):
-        super(ArchElement,self).__init__()
+        super(ArchElement, self).__init__()
         self.id = id
         self.interfaces = [EventInterface("ArchEvent")]
-        self.event_dispatchers = [ArchEventDispatcher("ArchEvent",self)]
+        self.event_dispatchers = [ArchEventDispatcher("ArchEvent", self)]
         self.parameters_of_interest = []
         self.properties = {}
         self.connections = []
         self.elem_status = "SUSPENDED"
         self.behavior = passed_behavior
-
+        self.lock = threading.Lock()
 
     # This class method should return a dictionary after the pattern of the one
     #  provided here. It is used by the ArchitectureManager to make connections
     #  between ArchElements.
+
     def description(self):
-        description = {             "id" : "ArchElement",
-                                 "class" : ArchElement,
-                            "interfaces" : [], # Interface ids (strings)
-                           "dispatchers" : [], # Dispatcher ids (strings)
-                        "events_emitted" : [], # List of outoing event types
-                       "events_consumed" : [], # List of incoming event types
-                      }
+        description = {"id": "ArchElement",
+                       "class": ArchElement,
+                       "interfaces": [],  # Interface ids (strings)
+                       "dispatchers": [],  # Dispatcher ids (strings)
+                       "events_emitted": [],  # List of outoing event types
+                       "events_consumed": [],  # List of incoming event types
+                       }
         raise NotImplementedError
 
     def behavior(self):
@@ -43,22 +45,20 @@ class ArchElement(threading.Thread):
         waiting without a timeout."""
         raise NotImplementedError
 
-
     def start_behavior(self):
         """ Behavior that will be run on component start."""
         pass
 
-
     def stop_behavior(self):
         """ Behavior that will be run before a component stops."""
         pass
-
 
     # DO NOT OVERRIDE:
     #   To specify behavior for an ArchElement override its 'behavior' method.
     # Check for any ArchEvents and do the appropriate thing based on the event
     # type. Then run
     # behavior.
+
     def run(self):
         self.start_behavior()
         while True:
@@ -71,7 +71,6 @@ class ArchElement(threading.Thread):
             elif self.elem_status == "RUNNING":
                 self.behavior()
 
-
     def suspend(self):
         """ Suspend a component's primary behavior.
         Temporarily suspends the ArchElement's behavior if it was running,
@@ -81,11 +80,9 @@ class ArchElement(threading.Thread):
         """
         self.elem_status = "SUSPENDED"
 
-
     def resume(self):
         """Resumes the ArchElement's activity if it was suspended."""
         self.elem_status = "RUNNING"
-
 
     def stop(self):
         """ Halts all component activity including response to ArchEvents.
@@ -94,7 +91,6 @@ class ArchElement(threading.Thread):
         self.stop_behavior()
         self.elem_status = "STOPPED"
         self.remove()
-
 
     def remove(self):
         """Disconnects a component by removing its interfaces, dispatchers, and
@@ -105,10 +101,8 @@ class ArchElement(threading.Thread):
         for i in self.event_dispatchers:
             self.remove_event_dispatcher(i.id)
 
-
     def add_interface(self, interface):
         self.interfaces.append(interface)
-
 
     def get_interface(self, interface_id):
         for interface in self.interfaces:
@@ -116,14 +110,11 @@ class ArchElement(threading.Thread):
                 return interface
         return None
 
-
     def remove_interface(self, interface_id):
         self.interfaces.remove(self.get_interface(interface_id))
 
-
     def add_event_dispatcher(self, event_dispatcher):
         self.event_dispatchers.append(event_dispatcher)
-
 
     def get_event_dispatcher(self, event_dispatcher_id):
         for dispatcher in self.event_dispatchers:
@@ -131,19 +122,17 @@ class ArchElement(threading.Thread):
                 return dispatcher
         return None
 
-
     def remove_event_dispatcher(self, event_dispatcher_id):
-        self.event_dispatchers.remove(self.get_event_dispatcher(event_dispatcher_id))
-
+        self.event_dispatchers.remove(
+            self.get_event_dispatcher(event_dispatcher_id))
 
     def fire_event_on_interface(self, event, interface_id):
-        self.get_interface(interface_id).fire_event(event.append_source(self.id))
-
+        self.get_interface(interface_id).fire_event(
+            event.append_source(self.id))
 
     def broadcast_event(self, event):
         for interface in self.interfaces:
             interface.fire_event(event.append_source(self.id))
-
 
     def property_names(self):
         """Returns a list of the names of all properties in the element"""
@@ -153,15 +142,15 @@ class ArchElement(threading.Thread):
         return prop_names
 
     def monitor_poi(self):
-        e = ArchEvent('MONITOR_RESPONSE','manager')
-        e.payload()['parameters'] = {}
+        e = ArchEvent('MONITOR_RESPONSE', 'manager')
+        e.payload['parameters'] = {}
         for key in self.parameters_of_interest:
             try:
                 val = getattr(self, key)
-                e.payload()['parameters'][key] = val
+                e.payload['parameters'][key] = val
             except KeyError:
                 pass
-        if not e.payload()['parameters']:
+        if not e.payload['parameters']:
             return
         self.fire_event_on_interface(e, 'ArchEvent')
 
@@ -175,7 +164,6 @@ class ArchElement(threading.Thread):
         prop = str(prop)
         self.properties[prop] = value
 
-
     def remove_property(self, prop):
         """Delete the specified property from the table if it exists"""
         prop = str(prop)
@@ -184,17 +172,15 @@ class ArchElement(threading.Thread):
         else:
             print('No property found with name ' + prop)
 
-
     # @TODO create listeners with knowledge of allowed event types
+
     def create_listener(self, dispatcher):
         """Create an event listener and associate it with a dispatcher"""
         el = EventListener(0, self.get_event_dispatcher(dispatcher))
         return el
 
-
     def __str__(self):
         return "{0}: {1}".format(self.__class__.__name__, self.id)
-
 
     def type(self):
         """Return the class name of the architectural element"""

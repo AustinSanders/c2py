@@ -24,8 +24,9 @@ class ArchEvent(Event, object):
         if formal_type not in self.formal_types:
             raise LookupError
 
+        super(Event, self).__init__()
         super(ArchEvent, self).__init__({'type' :formal_type})
-        self._payload['recipient'] = recipient_id
+        self.payload['recipient'] = recipient_id
 
     # No measures are necessary to prevent the mutation of event information
     #   Due to the fact that arch events are never retransferred.

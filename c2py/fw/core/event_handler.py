@@ -1,15 +1,17 @@
 from functools import wraps
 import time
+from c2py.fw.core import LogEvent
 
 def wrap(method):
     @wraps(method)
     def wrapped(*args, **kwargs):
         # arg[1] is event being processed - timestamp beginning of process
-        args[1].characteristics()['proc_start_ts'] = time.time()
+        e_log = LogEvent(args[1])
+        #args[1].context['owner'].fire_event_on_interface(e_log, "ArchEvent")
         r_val = method(*args, **kwargs)
-        args[1].characteristics()['proc_fin_ts'] = time.time()
         # @TODO Send event to manager for logging
-        args[1].context()['owner'].fire_event_on_interface(args[1], "ArchEvent")
+        e_log.end_timestamp()
+        args[1].context['owner'].fire_event_on_interface(e_log, "ArchEvent")
         return r_val
     return wrapped
 
@@ -23,11 +25,10 @@ class MetaHandler(type):
         if 'handle' in attrs:
             attrs['handle'] = wrap(attrs['handle'])
             return (super(MetaHandler, cls).__new__(cls, name, bases, attrs))
+        else:
+            raise IndexError
 
 
-
-class EventHandler(object):
-    __metaclass__ = MetaHandler
-
+class EventHandler(object, metaclass=MetaHandler):
     def handle(self, event):
         raise(NotImplementedError)

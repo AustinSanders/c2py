@@ -32,8 +32,8 @@ class EventDispatcher(Queue):
     def dispatch_event(self):
         try:
             current_event = self.get(self.blocking, self.timeout)
-            current_event.context()['owner'] = self.owner
-            current_event.context()['proc_begin'] = time.time()
+            current_event.context['owner'] = self.owner
+            current_event.context['proc_begin'] = time.time()
             self.task_done()
             for handler in self.event_handlers:
                 handler.handle(current_event)

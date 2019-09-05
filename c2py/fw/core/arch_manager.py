@@ -2,15 +2,64 @@ import yaml
 import sys
 import time
 import os
-if sys.version_info[0] == '3':
+
+if sys.version_info[0] == 3:
     from queue import Empty
 else:
     from Queue import Empty
 
 
-from c2py.fw.core import ComplexComponent, ArchEvent, ArchElement, ArchEventDispatcher, EventListener, EventDispatcher, EventHandler
+from c2py.fw.core import (ComplexComponent, ArchEvent, ArchElement,
+                          ArchEventDispatcher, EventListener, EventDispatcher,
+                          EventHandler, LogEvent)
 from c2py.fw.util import util as util
 
+
+class AdjacencyMatrix(dict):
+    class AutoDict(dict):
+        def __getitem__(self, item):
+            try:
+                return dict.__getitem__(self, item)
+            except KeyError:
+                value = self[item] = type(self)()
+                return value
+
+
+    def __init__(self):
+        self._matrix = AdjacencyMatrix.AutoDict()
+
+
+    def __repr__(self):
+        return str(self._matrix)
+
+
+    def update_event(self, event):
+        self.update(event.payload['source'],
+                    event.payload['dest'],
+                    event.payload['event_type'],
+                    event.payload['timestamp_end'] - event.payload['timestamp_start'])
+
+    def update(self, source, destination, type_id, value):
+        (n_elem, mean, mse) = self._matrix[source][destination][type_id] or (0,0,0)
+        n_elem += 1
+        delta = value - mean
+        mean += delta / n_elem
+        delta2 = value - mean
+        mse += delta * delta2
+        self._matrix[source][destination][type_id] = (n_elem, mean, mse)
+
+    def get(self, source, destination, type_id):
+        (n_elem, mean, mse) = self._matrix[source][destination][type_id]
+        (mean, variance) = (mean, mse/n_elem)
+        if n_elem < 2:
+            return float('nan')
+        else:
+            return (mean, variance)
+
+    def is_normal(self, source, destination, type_id, value):
+        (mean, variance) = self.get(source, destination, type_id)
+        std_dev = variance**.5
+        return (mean - (3*std_dev)) < value < (mean + (3*std_dev))
 
 class ArchManager(ComplexComponent):
     """ Manages an architecture."""
@@ -27,7 +76,7 @@ class ArchManager(ComplexComponent):
         self.time_since_monitor = time.time()
         log_file = os.path.splitext(model_file)[0]+'.log'
         self.log = open(log_file, 'a+')
-
+        self.adj_mat = AdjacencyMatrix()
 
         #Dispatcher for event logs
         from_arch = EventDispatcher("FromArch", self)
@@ -36,19 +85,11 @@ class ArchManager(ComplexComponent):
 
     class LogHandler(EventHandler):
         def handle(self, event):
-            print("handling!")
-            if not isinstance(event, ArchEvent):
-                event.context()['owner'].log.write("{} {} {} {}\n".format(
-                    type(event).__name__,
-                    event.characteristics()['creation_ts'],
-                    event.characteristics()['proc_start_ts'],
-                    event.characteristics()['proc_fin_ts']
-                ))
-                event.context()['owner'].log.flush()
-
-
-
-
+            if isinstance(event, LogEvent):
+                event.context['owner'].adj_mat.update_event(event)
+                print(event.context['owner'].adj_mat)
+            else:
+                pass
 
     def read_model_file(self, model_file):
         data = str()
@@ -76,6 +117,7 @@ class ArchManager(ComplexComponent):
             except Empty:
                 pass
 
+
     def request_monitor(self, recipient):
         e = ArchEvent('MONITOR_REQUEST', recipient)
         self.fire_event_on_interface(e,'ArchEvent')
@@ -98,8 +140,8 @@ class ArchManager(ComplexComponent):
             util.connect([new_element, 'ArchEvent'], [self, 'FromArch'],2)
             if parent is not None:
                 e = ArchEvent('EXEC', parent)
-                e.payload()['function'] = 'add_component'
-                e.payload()['args'] = [element_id, new_element]
+                e.payload['function'] = 'add_component'
+                e.payload['args'] = [element_id, new_element]
                 self.fire_event_on_interface(e, 'ArchEvent')
         else:
             print("Element of type " + class_name + " is not a valid " +
@@ -139,17 +181,17 @@ class ArchManager(ComplexComponent):
                 if listener in elems or elem in elems:
                     print('connected')
                     e = ArchEvent('CONNECT_INIT',listener)
-                    e.payload()['target'] = elem
-                    e.payload()['interface'] = 'top'
-                    e.payload()['dispatcher'] = 'notification_dispatcher'
+                    e.payload['target'] = elem
+                    e.payload['interface'] = 'top'
+                    e.payload['dispatcher'] = 'notification_dispatcher'
                     self.fire_event_on_interface(e, 'ArchEvent')
             for listener in model[elem]['requests']:
                 if listener in elems or elem in elems:
                     print('connected')
                     e = ArchEvent('CONNECT_INIT', listener)
-                    e.payload()['target'] = elem
-                    e.payload()['interface'] = 'bottom'
-                    e.payload()['dispatcher'] = 'request_dispatcher'
+                    e.payload['target'] = elem
+                    e.payload['interface'] = 'bottom'
+                    e.payload['dispatcher'] = 'request_dispatcher'
                     self.fire_event_on_interface(e, 'ArchEvent')
             try:
                 self.connect_listed(elems, model[elem]['elements'])
@@ -210,18 +252,18 @@ class ArchManager(ComplexComponent):
                 #  prepare an event listener to be sent to a target to be placed
                 #  in the proper interface.
                 e = ArchEvent('CONNECT_INIT',listener)
-                e.payload()['target'] = elem
-                e.payload()['interface'] = 'top'
-                e.payload()['dispatcher'] = 'notification_dispatcher'
+                e.payload['target'] = elem
+                e.payload['interface'] = 'top'
+                e.payload['dispatcher'] = 'notification_dispatcher'
                 self.fire_event_on_interface(e, 'ArchEvent')
                 #l_desc = listener.description()
                 # @@TODO Create actual connection ID, not just 0
                 #util.connect([current, "top"], [listener, "notification_dispatcher"],0)
             for listener in model[elem]['requests']:
                 e = ArchEvent('CONNECT_INIT', listener)
-                e.payload()['target'] = elem
-                e.payload()['interface'] = 'bottom'
-                e.payload()['dispatcher'] = 'request_dispatcher'
+                e.payload['target'] = elem
+                e.payload['interface'] = 'bottom'
+                e.payload['dispatcher'] = 'request_dispatcher'
                 self.fire_event_on_interface(e, 'ArchEvent')
             try:
                 self.connect_all(model[elem]['elements'])
@@ -248,5 +290,9 @@ class ArchManager(ComplexComponent):
 
 
 if __name__ == '__main__':
-    aem = ArchManager('../examples/test.yaml')
-    aem.start()
+    fpath = sys.argv[-1]
+    manager = ArchManager(fpath)
+    manager.add_all()
+    manager.connect_all()
+    manager.start_all()
+    manager.resume()
