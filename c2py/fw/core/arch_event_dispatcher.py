@@ -8,7 +8,7 @@ class ArchEventDispatcher(EventDispatcher, object):
         def handle(self, event):
             # @@ TODO differentiate or combine start / resume
             try:
-                if event.payload['recipient'] == self.owner.id or \
+                if event.payload['recipient'] == self.owner.element_id or \
                 event.payload['recipient'] == '\\all':
                     e_type = event.payload['type']
                     if e_type == "START":

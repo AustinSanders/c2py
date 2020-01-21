@@ -1,7 +1,7 @@
 class EventInterface(list):
     def __init__(self, id):
         list.__init__(self)
-        self.id = id
+        self.element_id = id
 
     def add_event_listener(self, event_listener):
         self.append(event_listener)

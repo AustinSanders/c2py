@@ -2,6 +2,8 @@ import yaml
 import sys
 import time
 import os
+import pandas as pd
+import numpy as np
 
 if sys.version_info[0] == 3:
     from queue import Empty
@@ -11,22 +13,21 @@ else:
 
 from c2py.fw.core import (ComplexComponent, ArchEvent, ArchElement,
                           ArchEventDispatcher, EventListener, EventDispatcher,
-                          EventHandler, LogEvent)
+                          ManagementHandler, LogEvent)
 from c2py.fw.util import util as util
 
 
-class AdjacencyMatrix(dict):
-    class AutoDict(dict):
-        def __getitem__(self, item):
-            try:
-                return dict.__getitem__(self, item)
-            except KeyError:
-                value = self[item] = type(self)()
-                return value
+class AdjacencyMatrix(object):
 
-
-    def __init__(self):
-        self._matrix = AdjacencyMatrix.AutoDict()
+    def __init__(self, components):
+        n_components = len(components)
+        n_elem = pd.DataFrame(np.zeros(shape=(n_components, n_components)),
+                                        columns=components.keys(), index=components.keys())
+        mean = pd.DataFrame(np.zeros(shape=(n_components, n_components)),
+                                        columns=components.keys(), index=components.keys())
+        mse = pd.DataFrame(np.zeros(shape=(n_components, n_components)),
+                                        columns=components.keys(), index=components.keys())
+        self._matrix = pd.concat([n_elem, mean, mse], keys=["n_elem", "mean", "mse"])
 
 
     def __repr__(self):
@@ -34,22 +35,30 @@ class AdjacencyMatrix(dict):
 
 
     def update_event(self, event):
-        self.update(event.payload['source'],
+        self.update(event.origin,
                     event.payload['dest'],
                     event.payload['event_type'],
                     event.payload['timestamp_end'] - event.payload['timestamp_start'])
 
     def update(self, source, destination, type_id, value):
-        (n_elem, mean, mse) = self._matrix[source][destination][type_id] or (0,0,0)
+        n_elem = self._matrix[destination].loc[[('n_elem', source)]][0]
+        mean = self._matrix[destination].loc[[('mean', source)]][0]
+        mse = self._matrix[destination].loc[[('mse', source)]][0]
+        #(n_elem, mean, mse) = self._matrix[source][destination][type_id] or (0,0,0)
         n_elem += 1
         delta = value - mean
         mean += delta / n_elem
         delta2 = value - mean
         mse += delta * delta2
-        self._matrix[source][destination][type_id] = (n_elem, mean, mse)
+        #self._matrix[source][destination][type_id] = (n_elem, mean, mse)
+        self._matrix[destination].loc[[('n_elem', source)]] = n_elem
+        self._matrix[destination].loc[[('mean', source)]] = mean
+        self._matrix[destination].loc[[('mse', source)]] = mse
 
     def get(self, source, destination, type_id):
-        (n_elem, mean, mse) = self._matrix[source][destination][type_id]
+        (n_elem, mean, mse) = (self._matrix[destination].loc[[('n_elem', source)]],
+                               self._matrix[destination].loc[[('mean', source)]],
+                               self._matrix[destination].loc[[('mse', source)]])
         (mean, variance) = (mean, mse/n_elem)
         if n_elem < 2:
             return float('nan')
@@ -76,18 +85,24 @@ class ArchManager(ComplexComponent):
         self.time_since_monitor = time.time()
         log_file = os.path.splitext(model_file)[0]+'.log'
         self.log = open(log_file, 'a+')
-        self.adj_mat = AdjacencyMatrix()
 
         #Dispatcher for event logs
         from_arch = EventDispatcher("FromArch", self)
         from_arch.add_event_handler(self.LogHandler())
         self.add_event_dispatcher(from_arch)
 
-    class LogHandler(EventHandler):
+        self.add_all()
+        self.connect_all()
+        self.start_all()
+        self.resume()
+
+        self.adj_mat = AdjacencyMatrix(self.components)
+
+    class LogHandler(ManagementHandler):
         def handle(self, event):
             if isinstance(event, LogEvent):
-                event.context['owner'].adj_mat.update_event(event)
-                print(event.context['owner'].adj_mat)
+                pass
+                #event.context['owner'].adj_mat.update_event(event)
             else:
                 pass
 
@@ -106,10 +121,12 @@ class ArchManager(ComplexComponent):
     def management_behavior(self):
         # @@TODO allow for adjustable polling time
         # if 3 seconds have passed since the last time we monitored
+        """
         if (time.time() - self.time_since_monitor) > 10:
             self.time_since_monitor = time.time()
             self.request_monitor('\\all')
             #self.replace_element('Receiver1', 'Receiver3', 'Receiver', 'E:/C2Py/examples/message.py')
+        """
 
         for dispatcher in self.event_dispatchers:
             try:
@@ -146,7 +163,7 @@ class ArchManager(ComplexComponent):
         else:
             print("Element of type " + class_name + " is not a valid " +
                     "architectural element.")
-
+        self.components[element_id] = new_element
 
 
     def replace_element(self, old_elem_id, new_elem_id, class_name, location, args = [], poi = []):
@@ -179,7 +196,6 @@ class ArchManager(ComplexComponent):
                 #  prepare an event listener to be sent to a target to be placed
                 #  in the proper interface.
                 if listener in elems or elem in elems:
-                    print('connected')
                     e = ArchEvent('CONNECT_INIT',listener)
                     e.payload['target'] = elem
                     e.payload['interface'] = 'top'
@@ -187,7 +203,6 @@ class ArchManager(ComplexComponent):
                     self.fire_event_on_interface(e, 'ArchEvent')
             for listener in model[elem]['requests']:
                 if listener in elems or elem in elems:
-                    print('connected')
                     e = ArchEvent('CONNECT_INIT', listener)
                     e.payload['target'] = elem
                     e.payload['interface'] = 'bottom'
@@ -292,7 +307,3 @@ class ArchManager(ComplexComponent):
 if __name__ == '__main__':
     fpath = sys.argv[-1]
     manager = ArchManager(fpath)
-    manager.add_all()
-    manager.connect_all()
-    manager.start_all()
-    manager.resume()

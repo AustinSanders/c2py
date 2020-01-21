@@ -12,7 +12,7 @@ class ArchElement(threading.Thread):
 
     def __init__(self, id, passed_behavior=None):
         super(ArchElement, self).__init__()
-        self.id = id
+        self.element_id = id
         self.interfaces = [EventInterface("ArchEvent")]
         self.event_dispatchers = [ArchEventDispatcher("ArchEvent", self)]
         self.parameters_of_interest = []
@@ -60,16 +60,20 @@ class ArchElement(threading.Thread):
     # behavior.
 
     def run(self):
-        self.start_behavior()
-        while True:
-            if self.elem_status == "STOPPED":
-                break
-            elif self.elem_status == "SUSPENDED":
-                ae_dispatcher = self.get_event_dispatcher("ArchEvent")
-                if ae_dispatcher is not None:
-                    ae_dispatcher.dispatch_event()
-            elif self.elem_status == "RUNNING":
-                self.behavior()
+        try:
+            self.start_behavior()
+            while True:
+                if self.elem_status == "STOPPED":
+                    break
+                elif self.elem_status == "SUSPENDED":
+                    ae_dispatcher = self.get_event_dispatcher("ArchEvent")
+                    if ae_dispatcher is not None:
+                        ae_dispatcher.dispatch_event()
+                elif self.elem_status == "RUNNING":
+                    self.behavior()
+        except Exception as e:
+            print(e)
+
 
     def suspend(self):
         """ Suspend a component's primary behavior.
@@ -96,17 +100,17 @@ class ArchElement(threading.Thread):
         """Disconnects a component by removing its interfaces, dispatchers, and
         listeners."""
         for i in self.interfaces:
-            self.remove_interface(i.id)
+            self.remove_interface(i.element_id)
 
         for i in self.event_dispatchers:
-            self.remove_event_dispatcher(i.id)
+            self.remove_event_dispatcher(i.element_id)
 
     def add_interface(self, interface):
         self.interfaces.append(interface)
 
     def get_interface(self, interface_id):
         for interface in self.interfaces:
-            if interface.id == interface_id:
+            if interface.element_id == interface_id:
                 return interface
         return None
 
@@ -118,7 +122,7 @@ class ArchElement(threading.Thread):
 
     def get_event_dispatcher(self, event_dispatcher_id):
         for dispatcher in self.event_dispatchers:
-            if dispatcher.id == event_dispatcher_id:
+            if dispatcher.element_id == event_dispatcher_id:
                 return dispatcher
         return None
 
@@ -128,11 +132,11 @@ class ArchElement(threading.Thread):
 
     def fire_event_on_interface(self, event, interface_id):
         self.get_interface(interface_id).fire_event(
-            event.append_source(self.id))
+            event.append_source(self.element_id))
 
     def broadcast_event(self, event):
         for interface in self.interfaces:
-            interface.fire_event(event.append_source(self.id))
+            interface.fire_event(event.append_source(self.element_id))
 
     def property_names(self):
         """Returns a list of the names of all properties in the element"""
@@ -180,7 +184,7 @@ class ArchElement(threading.Thread):
         return el
 
     def __str__(self):
-        return "{0}: {1}".format(self.__class__.__name__, self.id)
+        return "{0}: {1}".format(self.__class__.__name__, self.element_id)
 
     def type(self):
         """Return the class name of the architectural element"""

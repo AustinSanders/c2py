@@ -5,7 +5,6 @@ class ComplexComponent(Component):
     def component_behavior(self):
         pass
 
-
     def __init__(self, id, behavior = None):
         self.components = {}
         if behavior == None:
@@ -24,7 +23,7 @@ class ComplexComponent(Component):
     #   component so that the subarchitecture can act as a black box.
 
     def get_element(self, element_id):
-        """ Returns an element from the architectures list of components or
+        """ Returns an element from the architecture's list of components or
         connectors.
 
         Keyword arguments:

@@ -50,7 +50,7 @@ class Event(object):
 
     @payload.setter
     def payload(self, val):
-        self._payload = val
+        self._payload = copy.copy(val)
 
     @property
     def characteristics(self):
@@ -61,6 +61,24 @@ class Event(object):
         self._characteristics = val
 
     @property
+    def owner(self):
+        try:
+            return self._context['owner']
+        except:
+            return None
+
+    @owner.setter
+    def owner(self, val):
+        self._context['owner'] = val
+
+    @property
+    def origin(self):
+        try:
+            return self.payload['source'][0]
+        except:
+            return None
+
+    @property
     def context(self):
         return self._context
 
@@ -69,7 +87,7 @@ class Event(object):
         self._context = val
 
     def payload_copy(self):
-        return copy.deepcopy(self.payload)
+        return copy.copy(self.payload)
 
     def characteristics_copy(self):
         return copy.deepcopy(self.characteristics)
@@ -78,11 +96,11 @@ class Event(object):
         try:
             self.payload["source"]
         except KeyError:
-            e = make_from(self)
-            e.payload["source"] = source
+            e = self.clone()
+            e.payload["source"] = [source]
             return e
-        e = make_from(self)
-        e.payload['source'] = e.payload['source'] + ' ' +source
+        e = self.clone()
+        e.payload['source'].append(source)
         return e
 
     def clone(self):

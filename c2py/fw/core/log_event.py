@@ -5,7 +5,7 @@ class LogEvent(Event):
     def __init__(self, event):
         super(LogEvent, self).__init__()
         self.payload['source'] = event.payload['source']
-        self.payload['dest'] = event.context['owner'].id
+        self.payload['dest'] = event.context['owner'].element_id
         self.payload['event_type'] = type(event).__name__
         self.payload['event_id'] = id(event)
         self.start_timestamp()

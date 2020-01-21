@@ -1,6 +1,7 @@
 from .event import Event
 from .log_event import LogEvent
 from .event_handler import EventHandler
+from .event_handler import ManagementHandler
 from .event_listener import EventListener
 from .event_interface import EventInterface
 from .event_dispatcher import EventDispatcher

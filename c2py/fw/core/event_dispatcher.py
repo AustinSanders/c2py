@@ -10,7 +10,7 @@ else:
 class EventDispatcher(Queue):
     def __init__(self, id, owner, blocking=False, timeout=None, throwing=False):
         Queue.__init__(self)
-        self.id = id
+        self.element_id = id
         self.owner = owner
         self.blocking = blocking
         self.timeout = timeout
@@ -23,7 +23,7 @@ class EventDispatcher(Queue):
 
     def get_event_handler(self, event_handler_id):
         for handler in self.event_handlers:
-            if handler.id == event_handler_id:
+            if handler.element_id == event_handler_id:
                 return handler
 
     def remove_handler(self, event_handler_id):

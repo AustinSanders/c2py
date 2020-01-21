@@ -9,7 +9,6 @@ def wrap(method):
         e_log = LogEvent(args[1])
         #args[1].context['owner'].fire_event_on_interface(e_log, "ArchEvent")
         r_val = method(*args, **kwargs)
-        # @TODO Send event to manager for logging
         e_log.end_timestamp()
         args[1].context['owner'].fire_event_on_interface(e_log, "ArchEvent")
         return r_val
@@ -30,5 +29,9 @@ class MetaHandler(type):
 
 
 class EventHandler(object, metaclass=MetaHandler):
+    def handle(self, event):
+        raise(NotImplementedError)
+
+class ManagementHandler(object):
     def handle(self, event):
         raise(NotImplementedError)
