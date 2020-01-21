@@ -26,7 +26,7 @@ class Sender(fw.Component):
 
     def description(self):
         description = {
-                "id" : self.id,
+                "id" : self.element_id,
                 "class" : Sender,
                 "interfaces" : ["bottom"],
             }
@@ -40,7 +40,10 @@ class Sender(fw.Component):
 class Receiver(fw.Component):
     class RequestHandler(fw.EventHandler):
         def handle(self, event):
-            print(event)
+            with open('log{}'.format(event.owner),'a+') as f:
+                f.write(str(event))
+                f.flush()
+            #print(str(event))
 
 
     def receiver_behavior(self):
@@ -52,7 +55,7 @@ class Receiver(fw.Component):
 
     def description(self):
         description = {
-                "id" : self.id,
+                "id" : self.element_id,
                 "class" : Receiver,
                 "dispatchers" : ["request_dispatcher"]
             }
@@ -71,7 +74,7 @@ class Router(fw.Connector):
 
     class RequestHandler(fw.EventHandler):
         def handle(self, event):
-            event.context['owner'].fire_event_on_interface(event, "bottom")
+            event.owner.fire_event_on_interface(event, "bottom")
 
     def router_behavior(self):
         for dispatcher in self.event_dispatchers:
@@ -80,7 +83,7 @@ class Router(fw.Connector):
 
     def description(self):
         description = {
-                "id" : self.id,
+                "id" : self.element_id,
                 "class" : Router,
                 "interfaces" : ["bottom"],
                 "dispatchers" : ["request_dispatcher"]
@@ -106,14 +109,10 @@ class Message(fw.Event):
     def __str__(self):
         return("\nComponent {0}\nSource: {1}\n\tSubject: {2}\n\tBody: {3}\n".format(
             self.context['owner'],
-            self.payload['source'],
+            self.origin,
             self.payload['subject'],
             self.payload['text']))
 
 
 if __name__ == "__main__":
     manager = fw.ArchManager('./test.yaml')
-    manager.add_all()
-    manager.connect_all()
-    manager.start_all()
-    manager.resume()
