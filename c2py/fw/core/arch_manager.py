@@ -121,12 +121,9 @@ class ArchManager(ComplexComponent):
     def management_behavior(self):
         # @@TODO allow for adjustable polling time
         # if 3 seconds have passed since the last time we monitored
-        """
-        if (time.time() - self.time_since_monitor) > 10:
+        if (time.time() - self.time_since_monitor) > 3:
             self.time_since_monitor = time.time()
             self.request_monitor('\\all')
-            #self.replace_element('Receiver1', 'Receiver3', 'Receiver', 'E:/C2Py/examples/message.py')
-        """
 
         for dispatcher in self.event_dispatchers:
             try:
