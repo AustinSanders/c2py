@@ -76,8 +76,7 @@ class ArchManager(ComplexComponent):
     def __init__(self, model_file, shared_resource = {}, constraint_checker = None):
         super(ArchManager, self).__init__("manager", self.management_behavior)
         if constraint_checker == None:
-            pass
-            #constraint_checker = ConstraintChecker()
+            constraint_checker = ConstraintChecker()
         self.model_file = model_file
         self.shared_resource = shared_resource
         self.textual_model = self.read_model_file(model_file)
